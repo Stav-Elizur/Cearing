@@ -9,7 +9,7 @@ from pose_format.utils.reader import BufferReader
 from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
-from dataset.data_types import DataItemObject, ProcessedPoseDatum
+from dataset.data_types import DataItemObject, ProcessedPoseDatum, TextPoseDatum
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
@@ -18,12 +18,12 @@ DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDM
 def process_datum(datum: DataItemObject,
                   pose_header: PoseHeader,
                   normalization_info: PoseNormalizationInfo,
-                  components: List[str] = None) -> ProcessedPoseDatum:
+                  components: List[str] = None) -> List[TextPoseDatum]:
     # Get current object poses as dictionary
     tf_poses = {"": datum.pose} if datum.pose is not None else datum.poses
 
     # Create dictionary of all poses as Pose element
-    poses = {}
+    text_poses_datum = []
     for key, tf_pose in tf_poses.items():
         fps = int(tf_pose.fps.numpy())
         pose_body = NumPyPoseBody(fps, tf_pose.data.numpy(), tf_pose.conf.numpy())
@@ -38,15 +38,25 @@ def process_datum(datum: DataItemObject,
 
         # Remove unnecessary component
         pose_hide_legs(pose)
-        poses[key] = pose
 
-    # Return and object that contains id, diction of Poses object and the original object from dataset
-    return ProcessedPoseDatum(id=datum.id.numpy().decode('utf-8'),
-                              pose=poses[""] if datum.pose is not None else poses,
-                              tf_datum=datum)
+        pose.body.data = pose.body.data[:, :, :, :3]  # X,Y,Z
+        # Prune all leading frames containing only zeros
+        for i in range(len(pose.body.data)):
+            if pose.body.confidence[i].sum() != 0:
+                if i != 0:
+                    pose.body.data = pose.body.data[i:]
+                    pose.body.confidence = pose.body.confidence[i:]
+                break
 
+        text = datum.hamnosys.numpy().decode('utf-8').strip()
+        text_poses_datum.append(TextPoseDatum(id=datum.id,
+                                              text=text,
+                                              pose=pose,
+                                              length=max(len(pose.body.data), len(text) + 1)))
 
-def load_dataset() -> List[ProcessedPoseDatum]:
+    return text_poses_datum
+
+def load_dataset() -> List[List[TextPoseDatum]]:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
 
     # Loading Dicta sign data set

@@ -31,3 +31,10 @@ class ProcessedPoseDatum:
     id: str
     pose: Union[Pose, Dict[str, Pose]]
     tf_datum: DataItemObject
+
+@dataclass
+class TextPoseDatum:
+    id: str
+    text: str
+    pose: Pose
+    length: int
