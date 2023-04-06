@@ -9,7 +9,7 @@ from pose_format.utils.reader import BufferReader
 from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
-from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset
+from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, TextPoseItem
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
@@ -35,7 +35,7 @@ def process_datum(datum: DataItemObject,
             pose = pose.get_components(components)
 
         # Normalize pose element
-        # pose = pose.normalize(normalization_info)
+        pose = pose.normalize(normalization_info)
 
         # Remove unnecessary component
         pose_hide_legs(pose)
@@ -91,6 +91,6 @@ def pose_visualizer(pose: Pose, video_path: str):
 
 # Example for the above code
 if __name__ == '__main__':
-    datum = load_dataset()[0]
-    pose_visualizer(datum.pose, "results/example-video2.mp4")
+    datum: TextPoseItem = load_dataset()[0]
+    pose_visualizer(datum.pose.obj, "results/example-video2.mp4")
     print(load_dataset()[0].text)

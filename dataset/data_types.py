@@ -38,6 +38,22 @@ class TextPoseDatum:
     length: int
 
 
+@dataclass
+class PoseInfo:
+    obj: Pose
+    data: str
+    confidence: torch.Tensor
+    length: torch.Tensor
+    inverse_mask: torch.Tensor
+
+
+@dataclass
+class TextPoseItem:
+    id: str
+    text: str
+    pose: PoseInfo
+
+
 class TextPoseDataset(Dataset):
 
     def __init__(self, data: List[TextPoseDatum]):
@@ -53,14 +69,10 @@ class TextPoseDataset(Dataset):
         torch_body = pose.body.torch()
         pose_length = len(torch_body.data)
 
-        return {
-            "id": datum.id,
-            "text": datum.text,
-            "pose": {
-                "obj": pose,
-                "data": torch_body.data.tensor[:, 0, :, :],
-                "confidence": torch_body.confidence[:, 0, :],
-                "length": torch.tensor([pose_length], dtype=torch.float),
-                "inverse_mask": torch.ones(pose_length, dtype=torch.int8)
-            }
-        }
+        return TextPoseItem(id=datum.id,
+                            text=datum.text,
+                            pose=PoseInfo(obj=pose,
+                                          data=torch_body.data.tensor[:, 0, :, :],
+                                          confidence=torch_body.confidence[:, 0, :],
+                                          length=torch.tensor([pose_length], dtype=torch.float),
+                                          inverse_mask=torch.ones(pose_length, dtype=torch.int8)))
