@@ -1,1 +1,6 @@
 *transcription-main/
+*datasets-master/
+*idea/
+*__pycache__/
+*results/
+*.z01
