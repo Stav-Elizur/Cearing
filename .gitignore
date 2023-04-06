@@ -4,3 +4,4 @@
 *__pycache__/
 *results/
 *.z01
+*lightning_logs/

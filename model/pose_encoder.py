@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torch import nn
 
 from model.model_types import ConfigPoseEncoder

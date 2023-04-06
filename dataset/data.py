@@ -14,7 +14,7 @@ from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, T
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
-MAX_SEQ_SIZE = 1000
+MAX_SEQ_SIZE = 200
 
 
 def process_datum(datum: DataItemObject,
@@ -62,7 +62,7 @@ def process_datum(datum: DataItemObject,
 
 
 def load_dataset(split="train") -> TextPoseDataset:
-    config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
+    config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=None, include_pose="holistic")
 
     # Loading Dicta sign data set
     dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config}, split=split)
@@ -92,10 +92,10 @@ def load_dataset(split="train") -> TextPoseDataset:
 def pose_visualizer(pose: Pose, video_path: str):
     p = PoseVisualizer(pose)
     p.save_video(video_path, p.draw())
-
-
-# Example for the above code
-if __name__ == '__main__':
-    datum: TextPoseItem = load_dataset()[0]
-    pose_visualizer(datum.pose.obj, "results/example-video2.mp4")
-    print(load_dataset()[0].text)
+#
+#
+# # Example for the above code
+# if __name__ == '__main__':
+#     datum: TextPoseItem = load_dataset()[0]
+#     pose_visualizer(datum.pose.obj, "results/example-video2.mp4")
+#     print(load_dataset()[0].text)
