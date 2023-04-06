@@ -35,7 +35,7 @@ def process_datum(datum: DataItemObject,
             pose = pose.get_components(components)
 
         # Normalize pose element
-        pose = pose.normalize(normalization_info)
+        # pose = pose.normalize(normalization_info)
 
         # Remove unnecessary component
         pose_hide_legs(pose)
@@ -58,11 +58,11 @@ def process_datum(datum: DataItemObject,
     return text_poses_datum
 
 
-def load_dataset() -> TextPoseDataset:
+def load_dataset(split="train") -> TextPoseDataset:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
 
     # Loading Dicta sign data set
-    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config})
+    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config},split=split)
 
     # Read the header data according to pose body structure
     with open("holistic.header", "rb") as buffer:
