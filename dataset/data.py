@@ -37,9 +37,10 @@ def process_datum(datum: DataItemObject,
         # Normalize pose element
         # pose = pose.normalize(normalization_info)
 
-        # Remove unnecessary component
+        # Zero confidence of legs component
         pose_hide_legs(pose)
 
+        # Remove unnecessary components
         pose.body.data = pose.body.data[:, :, :, :3]  # X,Y,Z
         # Prune all leading frames containing only zeros
         for i in range(len(pose.body.data)):
@@ -49,6 +50,7 @@ def process_datum(datum: DataItemObject,
                     pose.body.confidence = pose.body.confidence[i:]
                 break
 
+        # Insert all text pose datum object to list
         text = datum.hamnosys.numpy().decode('utf-8').strip()
         text_poses_datum.append(TextPoseDatum(id=datum.id,
                                               text=text,
@@ -74,6 +76,7 @@ def load_dataset(split="train") -> TextPoseDataset:
     dicta_sign_train = filter(lambda data_item: data_item['spoken_language'].numpy().decode('utf-8') == "en",
                               dicta_sign["train"])
 
+    # Convert list of list of TextPoseDatum to one list
     text_pose_data = [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
                                                                                        pose_header,
                                                                                        normalization_info,
