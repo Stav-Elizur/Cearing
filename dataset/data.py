@@ -9,7 +9,7 @@ from pose_format.utils.reader import BufferReader
 from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
-from dataset.data_types import DataItemObject, ProcessedPoseDatum, TextPoseDatum
+from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
@@ -58,7 +58,7 @@ def process_datum(datum: DataItemObject,
     return text_poses_datum
 
 
-def load_dataset() -> List[TextPoseDatum]:
+def load_dataset() -> TextPoseDataset:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
 
     # Loading Dicta sign data set
@@ -74,11 +74,13 @@ def load_dataset() -> List[TextPoseDatum]:
     dicta_sign_train = filter(lambda data_item: data_item['spoken_language'].numpy().decode('utf-8') == "en",
                               dicta_sign["train"])
 
-    return [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
-                                                                             pose_header,
-                                                                             normalization_info,
-                                                                             DEFAULT_COMPONENTS) if
-            d.length < MAX_SEQ_SIZE]
+    text_pose_data = [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
+                                                                                       pose_header,
+                                                                                       normalization_info,
+                                                                                       DEFAULT_COMPONENTS) if
+                      d.length < MAX_SEQ_SIZE]
+
+    return TextPoseDataset(text_pose_data)
 
 
 # Show video os specific pose via Pose API
