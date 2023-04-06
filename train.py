@@ -24,17 +24,15 @@ def main():
 
     text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer()))
 
-    # Model Arguments
-    model_args = dict(pose_encoder=pose_encoder,
-                      text_encoder=text_encoder,
-                      hidden_dim=128,
-                      learning_rate=1e-4,
-                      seq_len_loss_weight=2e-5,
-                      smoothness_loss_weight=1e-2,
-                      noise_epsilon=1e-3,
-                      num_steps=100)
-
-    model = IterativeGuidedPoseGenerationModel(**model_args)
+    # Model
+    model = IterativeGuidedPoseGenerationModel(pose_encoder=pose_encoder,
+                                               text_encoder=text_encoder,
+                                               hidden_dim=128,
+                                               learning_rate=1e-4,
+                                               seq_len_loss_weight=2e-5,
+                                               smoothness_loss_weight=1e-2,
+                                               noise_epsilon=1e-3,
+                                               num_steps=100)
 
     callbacks = []
 

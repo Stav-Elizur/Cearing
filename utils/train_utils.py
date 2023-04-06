@@ -4,6 +4,8 @@ import numpy as np
 import torch
 from pose_format.torch.masked import MaskedTorch, MaskedTensor
 
+from dataset.data_types import TextPoseItem
+
 
 def collate_tensors(batch: List, pad_value=0) -> Union[torch.Tensor, List]:
     datum = batch[0]
@@ -47,6 +49,11 @@ def zero_pad_collator(batch) -> Union[Dict[str, torch.Tensor], Tuple[torch.Tenso
     # For tuples
     if isinstance(datum, tuple):
         return tuple(collate_tensors([b[i] for b in batch]) for i in range(len(datum)))
+
+    # For classes
+    if isinstance(datum, TextPoseItem):
+        keys = datum.__dict__.keys()
+        return {k: collate_tensors([b.__dict__[k] for b in batch]) for k in keys}
 
     # For dictionaries
     keys = datum.keys()
