@@ -13,6 +13,7 @@ from dataset.data_types import DataItemObject, ProcessedPoseDatum, TextPoseDatum
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
+MAX_SEQ_SIZE = 1000
 
 
 def process_datum(datum: DataItemObject,
@@ -34,7 +35,7 @@ def process_datum(datum: DataItemObject,
             pose = pose.get_components(components)
 
         # Normalize pose element
-        pose = pose.normalize(normalization_info)
+        # pose = pose.normalize(normalization_info)
 
         # Remove unnecessary component
         pose_hide_legs(pose)
@@ -56,7 +57,8 @@ def process_datum(datum: DataItemObject,
 
     return text_poses_datum
 
-def load_dataset() -> List[ProcessedPoseDatum]:
+
+def load_dataset() -> List[TextPoseDatum]:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
 
     # Loading Dicta sign data set
@@ -69,13 +71,14 @@ def load_dataset() -> List[ProcessedPoseDatum]:
     normalization_info = pose_normalization_info(pose_header)
 
     # Get all data in english from train dataset
-    dicta_sign_train = filter(lambda datum: datum['spoken_language'].numpy().decode('utf-8') == "en",
+    dicta_sign_train = filter(lambda data_item: data_item['spoken_language'].numpy().decode('utf-8') == "en",
                               dicta_sign["train"])
 
-    return [process_datum(DataItemObject(**datum),
-                          pose_header,
-                          normalization_info,
-                          DEFAULT_COMPONENTS) for datum in tqdm(dicta_sign_train)]
+    return [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
+                                                                             pose_header,
+                                                                             normalization_info,
+                                                                             DEFAULT_COMPONENTS) if
+            d.length < MAX_SEQ_SIZE]
 
 
 # Show video os specific pose via Pose API
@@ -88,4 +91,4 @@ def pose_visualizer(pose: Pose, video_path: str):
 if __name__ == '__main__':
     datum = load_dataset()[0]
     pose_visualizer(datum.pose, "results/example-video2.mp4")
-    print(load_dataset()[0].tf_datum.text)
+    print(load_dataset()[0].text)
