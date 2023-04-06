@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import tensorflow_datasets as tfds
@@ -64,19 +65,20 @@ def load_dataset(split="train") -> TextPoseDataset:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
 
     # Loading Dicta sign data set
-    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config},split=split)
+    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config}, split=split)
 
     # Read the header data according to pose body structure
-    with open("holistic.header", "rb") as buffer:
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(root_dir + "\holistic.header", "rb") as buffer:
         pose_header = PoseHeader.read(BufferReader(buffer.read()))
 
     normalization_info = pose_normalization_info(pose_header)
 
     # Get all data in english from train dataset
     dicta_sign_train = filter(lambda data_item: data_item['spoken_language'].numpy().decode('utf-8') == "en",
-                              dicta_sign["train"])
+                              dicta_sign)
 
-    # Convert list of list of TextPoseDatum to one list
+    # Convert list of TextPoseDatum to one list
     text_pose_data = [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
                                                                                        pose_header,
                                                                                        normalization_info,

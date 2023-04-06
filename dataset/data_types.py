@@ -41,7 +41,7 @@ class TextPoseDatum:
 @dataclass
 class PoseInfo:
     obj: Pose
-    data: str
+    data: torch.Tensor
     confidence: torch.Tensor
     length: torch.Tensor
     inverse_mask: torch.Tensor
@@ -62,7 +62,7 @@ class TextPoseDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> TextPoseItem:
         datum = self.data[index]
         pose = datum.pose
 
