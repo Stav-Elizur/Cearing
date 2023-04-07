@@ -20,6 +20,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""  # Only use CPU
 
 VIDEOS_PATH = "videos"
 
+
 def visualize_pose(pose: Pose, pose_name: str):
     normalization_info = pose_normalization_info(pose.header)
 
@@ -29,7 +30,8 @@ def visualize_pose(pose: Pose, pose_name: str):
 
     # Draw original pose
     visualizer = PoseVisualizer(pose, thickness=2)
-    visualizer.save_video(os.path.join(VIDEOS_PATH, pose_name), visualizer.draw(), custom_ffmpeg="ffmpeg_videos")
+    visualizer.save_video(os.path.join(VIDEOS_PATH, pose_name), visualizer.draw(),
+                          custom_ffmpeg="C:\projects\\ffmpeg\\bin\\ffmpeg")
 
 
 def visualize_poses(_id: str, text: str, poses: List[Pose]) -> str:
@@ -57,7 +59,7 @@ def data_to_pose(pred_seq, pose_header: PoseHeader):
 if __name__ == '__main__':
 
     os.makedirs('predictions', exist_ok=True)
-    train_dataset = load_dataset(split="train[:10%]")
+    train_dataset = load_dataset(split="train[:1%]")
 
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
     pose_header = train_dataset.data[0].pose.header
@@ -76,7 +78,7 @@ if __name__ == '__main__':
                       noise_epsilon=1e-3,
                       num_steps=100)
 
-    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model.ckpt', **model_args)
+    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model-v1.ckpt', **model_args)
     model.eval()
 
     html = []

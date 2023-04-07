@@ -36,7 +36,7 @@ def process_datum(datum: DataItemObject,
             pose = pose.get_components(components)
 
         # Normalize pose element
-        # pose = pose.normalize(normalization_info)
+        pose = pose.normalize(normalization_info)
 
         # Zero confidence of legs component
         pose_hide_legs(pose)
