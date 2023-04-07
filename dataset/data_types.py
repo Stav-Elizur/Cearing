@@ -62,17 +62,21 @@ class TextPoseDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, index) -> TextPoseItem:
+    def __getitem__(self, index):
         datum = self.data[index]
         pose = datum.pose
 
         torch_body = pose.body.torch()
         pose_length = len(torch_body.data)
 
-        return TextPoseItem(id=datum.id,
-                            text=datum.text,
-                            pose=PoseInfo(obj=pose,
-                                          data=torch_body.data.tensor[:, 0, :, :],
-                                          confidence=torch_body.confidence[:, 0, :],
-                                          length=torch.tensor([pose_length], dtype=torch.float),
-                                          inverse_mask=torch.ones(pose_length, dtype=torch.int8)))
+        return {
+            "id": datum.id,
+            "text": datum.text,
+            "pose": {
+                "obj": pose,
+                "data": torch_body.data.tensor[:, 0, :, :],
+                "confidence": torch_body.confidence[:, 0, :],
+                "length": torch.tensor([pose_length], dtype=torch.float),
+                "inverse_mask": torch.ones(pose_length, dtype=torch.int8)
+            }
+        }

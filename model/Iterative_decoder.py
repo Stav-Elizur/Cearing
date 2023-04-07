@@ -5,7 +5,6 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from torch import nn
-from torch.nn.utils.rnn import pad_sequence
 
 from model.distribution import DistributionPredictionModel
 from model.masked_loss import masked_loss
@@ -194,15 +193,13 @@ class IterativeGuidedPoseGenerationModel(pl.LightningModule):
                     batch["text"][i] = ""
 
         text_encoding = self.text_encoder(batch["text"])
-        pose = {key: [pose.__dict__[key] for pose in batch["pose"]] for key in batch["pose"][0].__dict__.keys()}
+        pose = batch["pose"]
 
         # Calculate sequence length loss
         sequence_length = self.seq_length(torch.mean(text_encoding["data"], dim=1))
-        sequence_length_loss = F.mse_loss(sequence_length, torch.unsqueeze(torch.Tensor(pose["length"]), 1))
+        sequence_length_loss = F.mse_loss(sequence_length, pose["length"])
 
         # Reconstruct missing keypoints from the first pose
-        pose["data"] = pad_sequence(pose["data"], batch_first=True, padding_value=0)
-        pose["confidence"] = pad_sequence(pose["confidence"], batch_first=True, padding_value=0)
         first_pose = pose["data"][:, 0]
         first_conf = pose["confidence"][:, 0]
         fixed_pose = self.correct_pose(first_pose)
@@ -213,7 +210,6 @@ class IterativeGuidedPoseGenerationModel(pl.LightningModule):
                                                model_num_steps=1)
 
         # Repeat the first frame for initial prediction
-        pose["inverse_mask"] = pad_sequence(pose["inverse_mask"], batch_first=True, padding_value=0)
         batch_size, pose_seq_length, _, _ = pose["data"].shape
         pose_sequence = {
             "data": torch.stack([first_pose] * pose_seq_length, dim=1),
