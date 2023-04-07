@@ -1,3 +1,7 @@
+import os
+
+import torch
+from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
 
 from dataset.data import load_dataset
@@ -35,8 +39,17 @@ def main():
                                                num_steps=100)
 
     callbacks = []
+    os.makedirs("models", exist_ok=True)
 
-    trainer = pl.Trainer(max_epochs=5000, callbacks=callbacks, accelerator='cpu', devices=1)
+    callbacks.append(
+        ModelCheckpoint(dirpath="models/" + '1',
+                        filename="model",
+                        verbose=True,
+                        save_top_k=1,
+                        monitor='train_loss',
+                        mode='min'))
+
+    trainer = pl.Trainer(max_epochs=5, callbacks=callbacks, accelerator='cpu', devices=1)
 
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=validation_loader)
 
