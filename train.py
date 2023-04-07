@@ -18,7 +18,7 @@ def main():
     validation_dataset = load_dataset(split="train[:10]")
     validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, collate_fn=zero_pad_collator)
 
-    _, num_pose_joints, num_pose_dims = train_dataset[0].pose.data.shape
+    _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
 
     pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims), dropout=0))
 
