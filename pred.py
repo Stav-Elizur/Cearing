@@ -28,10 +28,19 @@ def visualize_pose(pose: Pose, pose_name: str):
     pose = pose.normalize(normalization_info, scale_factor=100)
     pose.focus()
 
+    if pose.header.dimensions.height % 2 == 1:
+        pose.header.dimensions.height += 1
+
+    if pose.header.dimensions.width % 2 == 1:
+        pose.header.dimensions.width += 1
+
+    if pose.header.dimensions.depth % 2 == 1:
+        pose.header.dimensions.depth += 1
+
     # Draw original pose
     visualizer = PoseVisualizer(pose, thickness=2)
     visualizer.save_video(os.path.join(VIDEOS_PATH, pose_name), visualizer.draw(),
-                          custom_ffmpeg="C:\projects\\ffmpeg\\bin\\ffmpeg")
+                          custom_ffmpeg="C:\\ffmpeg\\bin\\ffmpeg.exe")
 
 
 def visualize_poses(_id: str, text: str, poses: List[Pose]) -> str:
@@ -78,7 +87,7 @@ if __name__ == '__main__':
                       noise_epsilon=1e-3,
                       num_steps=100)
 
-    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model-v1.ckpt', **model_args)
+    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model.ckpt', **model_args)
     model.eval()
 
     html = []

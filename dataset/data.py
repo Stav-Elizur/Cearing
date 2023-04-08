@@ -90,12 +90,28 @@ def load_dataset(split="train") -> TextPoseDataset:
 
 # Show video os specific pose via Pose API
 def pose_visualizer(pose: Pose, video_path: str):
-    p = PoseVisualizer(pose)
-    p.save_video(video_path, p.draw())
-#
-#
+    normalization_info = pose_normalization_info(pose.header)
+
+    # Normalize pose
+    pose = pose.normalize(normalization_info, scale_factor=100)
+    pose.focus()
+
+    if pose.header.dimensions.height % 2 == 1:
+        pose.header.dimensions.height += 1
+
+    if pose.header.dimensions.width % 2 == 1:
+        pose.header.dimensions.width += 1
+
+    if pose.header.dimensions.depth % 2 == 1:
+        pose.header.dimensions.depth += 1
+
+    # Draw original pose
+    p = PoseVisualizer(pose, thickness=2)
+    p.save_video(video_path, p.draw(), custom_ffmpeg="C:\\ffmpeg\\bin\\ffmpeg.exe")
+
+
 # # Example for the above code
-# if __name__ == '__main__':
-#     datum: TextPoseItem = load_dataset()[0]
-#     pose_visualizer(datum.pose.obj, "results/example-video2.mp4")
-#     print(load_dataset()[0].text)
+if __name__ == '__main__':
+    datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
+    pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
+    # print(load_dataset()[0].text)
