@@ -50,7 +50,7 @@ def visualize_poses(_id: str, text: str, poses: List[Pose]) -> str:
     for k, pose in enumerate(poses):
         pose_name = f"{_id}_{k}.mp4"
         visualize_pose(pose, pose_name)
-        html_tags += f"<video src='{pose_name}' controls preload='none'></video>"
+        html_tags += f"<video src=\"{pose_name}\" controls preload='none'></video>"
 
     return html_tags
 
