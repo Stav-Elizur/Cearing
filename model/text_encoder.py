@@ -16,13 +16,14 @@ class TextEncoderModel(nn.Module):
 
         self.embedding = nn.Embedding(
             num_embeddings=len(config.tokenizer),
-            embedding_dim=128,
+            embedding_dim=config.hidden_dim,
             padding_idx=config.tokenizer.pad_token_id,
         )
 
-        self.positional_embedding = nn.Embedding(num_embeddings=1000, embedding_dim=128)
+        self.positional_embedding = nn.Embedding(num_embeddings=config.max_seq_size,
+                                                 embedding_dim=config.hidden_dim)
 
-        encoder_layer = nn.TransformerEncoderLayer(d_model=128,
+        encoder_layer = nn.TransformerEncoderLayer(d_model=config.hidden_dim,
                                                    nhead=config.encoder_heads,
                                                    dim_feedforward=config.dim_feedforward,
                                                    batch_first=True)

@@ -14,19 +14,27 @@ from utils.train_utils import zero_pad_collator
 import pytorch_lightning as pl
 
 BATCH_SIZE = 64
-
+DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
+MAX_SEQ_SIZE = 200
 
 def main():
-    train_dataset = load_dataset(split="train[10:]")
+    train_dataset = load_dataset(split="train[10%:]",
+                                 max_seq_size=MAX_SEQ_SIZE,
+                                 components=DEFAULT_COMPONENTS)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=zero_pad_collator)
-    validation_dataset = load_dataset(split="train[:10]")
+    validation_dataset = load_dataset(split="train[0%:10%]",
+                                      max_seq_size=MAX_SEQ_SIZE,
+                                      components=DEFAULT_COMPONENTS)
     validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, collate_fn=zero_pad_collator)
 
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
 
-    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims), dropout=0))
+    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims),
+                                                      dropout=0,
+                                                      max_seq_size=MAX_SEQ_SIZE))
 
-    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer()))
+    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer(),
+                                                      max_seq_size=MAX_SEQ_SIZE))
 
     # Model
     model = IterativeGuidedPoseGenerationModel(pose_encoder=pose_encoder,
