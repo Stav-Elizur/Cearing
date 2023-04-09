@@ -13,6 +13,7 @@ from dataset.data import load_dataset
 from model.Iterative_decoder import IterativeGuidedPoseGenerationModel
 from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
+from train import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 from model.text_encoder import TextEncoderModel
 
@@ -40,8 +41,7 @@ def visualize_pose(pose: Pose, pose_name: str):
     # Draw original pose
     visualizer = PoseVisualizer(pose, thickness=2)
     visualizer.save_video(os.path.join(VIDEOS_PATH, pose_name), visualizer.draw(),
-                          custom_ffmpeg="C:\\ffmpeg\\bin\\ffmpeg.exe")
-
+                          custom_ffmpeg="C:\projects\\ffmpeg\\bin")
 
 def visualize_poses(_id: str, text: str, poses: List[Pose]) -> str:
     lengths = " / ".join([str(len(p.body.data)) for p in poses])
@@ -68,14 +68,14 @@ def data_to_pose(pred_seq, pose_header: PoseHeader):
 if __name__ == '__main__':
 
     os.makedirs('predictions', exist_ok=True)
-    train_dataset = load_dataset(split="train[:1%]")
+    train_dataset = load_dataset(split="train[:1%]",max_seq_size=MAX_SEQ_SIZE,components=DEFAULT_COMPONENTS)
 
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
     pose_header = train_dataset.data[0].pose.header
 
-    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims), dropout=0))
+    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims), dropout=0,max_seq_size=200))
 
-    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer()))
+    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer(),max_seq_size=200))
 
     # Model Arguments
     model_args = dict(pose_encoder=pose_encoder,
@@ -87,7 +87,7 @@ if __name__ == '__main__':
                       noise_epsilon=1e-3,
                       num_steps=100)
 
-    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model.ckpt', **model_args)
+    model = IterativeGuidedPoseGenerationModel.load_from_checkpoint('models/1/model-v1.ckpt', **model_args)
     model.eval()
 
     html = []
