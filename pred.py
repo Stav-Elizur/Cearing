@@ -73,9 +73,12 @@ if __name__ == '__main__':
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
     pose_header = train_dataset.data[0].pose.header
 
-    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims), dropout=0,max_seq_size=200))
+    pose_encoder = PoseEncoderModel(ConfigPoseEncoder(pose_dims=(num_pose_joints, num_pose_dims),
+                                                      dropout=0,
+                                                      max_seq_size=MAX_SEQ_SIZE))
 
-    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer(),max_seq_size=200))
+    text_encoder = TextEncoderModel(ConfigTextEncoder(tokenizer=HamNoSysTokenizer(),
+                                                      max_seq_size=MAX_SEQ_SIZE))
 
     # Model Arguments
     model_args = dict(pose_encoder=pose_encoder,
