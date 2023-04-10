@@ -33,9 +33,9 @@ jobs:
           python -m venv venv
           . venv/bin/activate
           python -m pip install protobuf==3.19.6
-          ls venv/lib/python3.10
+          ls venv/lib/python3.10/site-packages
           echo "-----"
-          ls venv/lib64/python3.10
+          ls venv/lib64/python3.10/site-packages
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
