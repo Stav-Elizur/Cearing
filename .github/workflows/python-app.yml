@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  DATASET_CACHE_DIR: ${{ runner.workspace }}/dataset_cache
+  DATASET_CACHE_DIR: dataset_cache
 
 jobs:
   build:
