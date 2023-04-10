@@ -10,8 +10,8 @@ from pose_format.utils.reader import BufferReader
 from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
-from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, TextPoseItem
-from train import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
+from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 

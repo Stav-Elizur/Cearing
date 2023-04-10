@@ -51,6 +51,7 @@ jobs:
         if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
           mkdir "$env:DATASET_CACHE_DIR"
           pwd
+          
           python dataset/data.py
         fi
 

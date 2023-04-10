@@ -13,7 +13,7 @@ from dataset.data import load_dataset
 from model.Iterative_decoder import IterativeGuidedPoseGenerationModel
 from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
-from train import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 from model.text_encoder import TextEncoderModel
 
