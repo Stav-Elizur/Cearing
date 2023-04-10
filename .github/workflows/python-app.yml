@@ -28,7 +28,7 @@ jobs:
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
 
-      - name: Install dependencies
+      - name: Install dependenciess
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           pwd
