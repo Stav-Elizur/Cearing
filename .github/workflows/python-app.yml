@@ -17,61 +17,63 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
-        id: setup-python
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-      - uses: syphar/restore-virtualenv@v1
-        id: cache-virtualenv
 
-      - uses: syphar/restore-pip-download-cache@v1
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+      - name: Restore cached dependencies
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-dependencies-
 
-
-      - name: Install dependenciess
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+      - name: Install dependencies
         run: |
           pwd
-          python -m venv /home/runner/.virtualenvs/.venv
-          . venv/bin/activate
-          python -m pip install protobuf==3.19.6
-          ls venv/lib/python3.10/site-packages
-          echo "-----"
-          ls venv/lib64/python3.10/site-packages
-          touch venv/lib64/python3.10/site-packages/google/__init__.py
-          touch venv/lib/python3.10/site-packages/google/__init__.py       
-          touch venv/lib64/python3.10/site-packages/google/protobuf/internal/builder.py
-          touch venv/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          cp builder.py venv/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          cp builder.py venv/lib64/python3.10/site-packages/google/protobuf/internal/builder.py
-          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+          ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          pip install protobuf==3.19.6
+          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
+          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-dependencies-
 
   load_dataset:
     runs-on: ubuntu-latest
     needs: install_dependencies
     steps:
       - uses: actions/checkout@v3
-      - uses: syphar/restore-virtualenv@v1
-        id: cache-virtualenv
 
-
-      - name: Cache dataset
+      - name: Restore cached dependencies
         uses: actions/cache@v2
         with:
-          path: ${{ env.DATASET_CACHE_DIR }}
-          key: dataset-${{ hashFiles('requirements.txt') }}
+          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
-            dataset-${{ hashFiles('requirements.txt') }}
+            ${{ runner.os }}-dependencies-
+
       - name: Load dataset
         run: |
-          if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
-            mkdir "$env:DATASET_CACHE_DIR"
-            ls /home/runner/.virtualenvs/.venv/lib/python3.10/site-packages
-            python -m venv /home/runner/.virtualenvs/.venv
-            ls venv/lib/python3.10/site-packages
-            pwd
             python -m dataset.data
-          fi
+
+#      - name: Cached Dataset
+#        uses: actions/cache@v2
+#        with:
+#          path:
+#          key: ${{ runner.os }}-Dataset-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-Dataset-
+
 #  train:
 #    runs-on: ubuntu-latest
 #    needs: load_dataset
