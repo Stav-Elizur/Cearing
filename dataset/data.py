@@ -68,7 +68,7 @@ def load_dataset(split,
 
     # Read the header data according to pose body structure
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(root_dir + "\holistic.header", "rb") as buffer:
+    with open(root_dir + "/holistic.header", "rb") as buffer:
         pose_header = PoseHeader.read(BufferReader(buffer.read()))
 
     normalization_info = pose_normalization_info(pose_header)
