@@ -112,7 +112,7 @@ def pose_visualizer(pose: Pose, video_path: str):
 
 # # Example for the above code
 if __name__ == '__main__':
-    load_dataset(split="train",
+    load_dataset(split="train[:5%]",
                  max_seq_size=MAX_SEQ_SIZE,
                  components=DEFAULT_COMPONENTS)
     # datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
