@@ -28,7 +28,7 @@ jobs:
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
       - name: Cache pip packages
         uses: actions/cache@v2
