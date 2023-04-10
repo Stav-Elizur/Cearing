@@ -68,7 +68,7 @@ jobs:
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          pip show tensorflow_datasets
+          pip show setuptools
           python -m dataset.data
 
 #      - name: Cached Dataset
