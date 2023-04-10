@@ -66,6 +66,7 @@ jobs:
         run: |
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
+            python -m venv venv
             ls
             ls venv/lib/python3.10/site-packages
             pwd
