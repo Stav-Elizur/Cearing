@@ -36,11 +36,13 @@ jobs:
           ls venv/lib/python3.10/site-packages
           echo "-----"
           ls venv/lib64/python3.10/site-packages
-          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
-          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          touch venv/lib64/python3.10/site-packages/google/__init__.py
+          touch venv/lib/python3.10/site-packages/google/__init__.py       
+          touch venv/lib64/python3.10/site-packages/google/protobuf/internal/builder.py
+          touch venv/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          cp builder.py venv/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          cp builder.py venv/lib64/python3.10/site-packages/google/protobuf/internal/builder.py
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-          ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
 
   load_dataset:
     runs-on: ubuntu-latest
@@ -69,7 +71,7 @@ jobs:
         run: |
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
-            ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+            ls venv/lib/python3.10/site-packages
             pwd
             python -m dataset.data
           fi
