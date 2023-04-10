@@ -51,8 +51,8 @@ jobs:
         if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
           mkdir "$env:DATASET_CACHE_DIR"
           pwd
-          
-          python dataset/data.py
+          ls
+          python -m dataset.data
         fi
 
     - name: Run Train
