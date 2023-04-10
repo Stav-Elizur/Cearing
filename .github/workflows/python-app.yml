@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  DATASET_CACHE_DIR: dataset_cache
+  DATASET_CACHE_DIR: dataset_cached
 
 jobs:
   install_dependencies:
@@ -71,7 +71,6 @@ jobs:
             ${{ runner.os }}-dataset-
 
       - name: Load dataset
-        if: steps.cache-dataset.outputs.cache-hit != 'true'
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
           ls ${{ env.DATASET_CACHE_DIR }}
