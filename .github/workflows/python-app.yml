@@ -49,6 +49,8 @@ jobs:
             dataset-${{ hashFiles('requirements.txt') }}
       - name: Load dataset
         run: |
+          pwd
+          ls
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
             python -m dataset.data
