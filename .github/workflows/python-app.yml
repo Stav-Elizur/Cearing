@@ -31,9 +31,9 @@ jobs:
         run: |
           pwd
           ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          python -m venv venv
           ls
           ls venv
-          python -m venv venv
           . venv/bin/activate
           pip install protobuf==3.19.6
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
