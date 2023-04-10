@@ -117,6 +117,3 @@ if __name__ == '__main__':
                  max_seq_size=MAX_SEQ_SIZE,
                  components=DEFAULT_COMPONENTS,
                  data_dir=DATA_DIR)
-    # datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
-    # pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
-    # print(load_dataset()[0].text)
