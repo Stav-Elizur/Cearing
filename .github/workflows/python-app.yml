@@ -50,7 +50,9 @@ jobs:
         run: |
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
-            python dataset.data
+            ls
+            pwd
+            python -m dataset.data
           fi
   train:
     runs-on: ubuntu-latest
