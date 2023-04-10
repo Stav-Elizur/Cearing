@@ -50,16 +50,9 @@ jobs:
     needs: install_dependencies
     steps:
       - uses: actions/checkout@v3
-      - name: Restore cached pip packages
-        uses: actions/cache@v2
-        with:
-          path: venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
+      - uses: syphar/restore-virtualenv@v1
+        id: cache-dependencies
 
-      - name: Activate venv
-        run: source venv/bin/activate
 
       - name: Cache dataset
         uses: actions/cache@v2
