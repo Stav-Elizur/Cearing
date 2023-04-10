@@ -66,7 +66,7 @@ jobs:
         run: |
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
-            ls ~/.venv
+            ls /home/runner/.virtualenvs/.venv
             ls venv/lib/python3.10/site-packages
             pwd
             python -m dataset.data
