@@ -9,107 +9,40 @@ permissions:
   contents: read
 
 env:
-  DATASET_CACHE_DIR: dataset_cache
+  DATASET_CACHE_DIR: dataset_cached
 
 jobs:
-  install_dependencies:
+  build:
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-
-      - name: Create venv
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        id: cache-dependencies
-        with:
-          path: venv/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: ''
-
       - name: Install dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
-          pwd
+          python -m pip install --upgrade pip
+          pip uninstall protobuf
+          pip uninstall google
           pip install protobuf==3.19.6
-          pip install google
+          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/__init__.py
+          touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+          cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip show tensorflow-datasets
-          ls venv/lib/python3.10/site-packages/
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        with:
-          path: venv/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
-
-  load_dataset:
-    runs-on: ubuntu-latest
-    needs: install_dependencies
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Create venv
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: venv/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
-
       - name: Load dataset
         run: |
-          ls venv/lib/python3.10/site-packages/
-          pip show setuptools
-          python -m dataset.data
+          if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
+            mkdir "$env:DATASET_CACHE_DIR"
+            python -m dataset.data
+          fi
 
-#      - name: Cached Dataset
-#        uses: actions/cache@v2
-#        with:
-#          path:
-#          key: ${{ runner.os }}-Dataset-${{ hashFiles('**/requirements*.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-Dataset-
-
-#  train:
-#    runs-on: ubuntu-latest
-#    needs: load_dataset
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: Set up Python 3.10
-#        uses: actions/setup-python@v3
-#        with:
-#          python-version: "3.10"
-#
-#      - name: Run Train
-#        run: |
-#          python train.py
-#
-#  artifacts:
-#    runs-on: ubuntu-latest
-#    needs: train
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: 'Upload Artifact'
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: my-artifact
-#          path: models/1/model.ckpt
-#          retention-days: 5
+      - name: Cache dataset
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.DATASET_CACHE_DIR }}
+          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-dataset-
