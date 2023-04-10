@@ -74,6 +74,7 @@ jobs:
         if: steps.cache-dataset.outputs.cache-hit != 'true'
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          ls ${{ env.DATASET_CACHE_DIR }}
           echo "stav"
 
 #      - name: Cache dataset
