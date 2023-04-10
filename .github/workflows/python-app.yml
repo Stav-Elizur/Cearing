@@ -32,7 +32,7 @@ jobs:
       run: |
         if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
           mkdir "$env:DATASET_CACHE_DIR"
-          python data.py
+          python dataset/data.py
         fi
 
     - uses: actions/checkout@v3
