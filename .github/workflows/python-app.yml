@@ -34,15 +34,12 @@ jobs:
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-
   load_dataset:
     runs-on: ubuntu-latest
     needs: install_dependencies
     steps:
-#      - uses: actions/checkout@v3
       - name: Cache dataset
-      - uses: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: ${{ env.DATASET_CACHE_DIR }}
           key: dataset-${{ hashFiles('requirements.txt') }}
@@ -50,19 +47,16 @@ jobs:
             dataset-${{ hashFiles('requirements.txt') }}
       - name: Load dataset
         run: |
-          pwd
-          ls
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
-            python -m dataset.data
+            python dataset.data
           fi
   train:
     runs-on: ubuntu-latest
     needs: load_dataset
     steps:
-#      - uses: actions/checkout@v3
       - name: Set up Python 3.10
-      - uses: actions/setup-python@v3
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
       - name: Run Train
@@ -72,9 +66,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: train
     steps:
-#      - uses: actions/checkout@v3
       - name: 'Upload Artifact'
-      - uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: my-artifact
           path: models/1/model.ckpt
