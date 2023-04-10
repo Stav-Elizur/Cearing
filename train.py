@@ -15,12 +15,12 @@ from utils.train_utils import zero_pad_collator
 import pytorch_lightning as pl
 
 def main():
-    train_dataset = load_dataset(split="train[1%:5%]",
+    train_dataset = load_dataset(split="train[10%:]",
                                  max_seq_size=MAX_SEQ_SIZE,
                                  components=DEFAULT_COMPONENTS,
                                  data_dir=DATA_DIR)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=zero_pad_collator)
-    validation_dataset = load_dataset(split="train[0%:1%]",
+    validation_dataset = load_dataset(split="train[0%:10%]",
                                       max_seq_size=MAX_SEQ_SIZE,
                                       components=DEFAULT_COMPONENTS,
                                       data_dir=DATA_DIR)
