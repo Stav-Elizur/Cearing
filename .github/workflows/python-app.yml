@@ -27,8 +27,6 @@ jobs:
         with:
           path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
 
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
@@ -67,6 +65,7 @@ jobs:
 
       - name: Load dataset
         run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
           pip show tensorflow_datasets
           python -m dataset.data
