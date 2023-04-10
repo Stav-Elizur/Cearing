@@ -1,5 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# This workflow will install Python dependencies, load the dataset, and run the training script on CI with cache to dataset.
 
 name: Python application
 
@@ -37,14 +36,15 @@ jobs:
         fi
 
     - uses: actions/checkout@v3
-        - name: Set up Python 3.10
-        uses: actions/setup-python@v3
 
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
     - name: Install dependencies
       run: |
-        python -m pip install  --upgrade pip
+        python -m pip install --upgrade pip
         pip uninstall protobuf
         pip uninstall google
         pip install protobuf==3.19.6
@@ -52,6 +52,7 @@ jobs:
         touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
         cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Run Train
       run: |
         python train.py
