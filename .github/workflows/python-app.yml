@@ -112,14 +112,9 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
           python -m train
 
-#  artifacts:
-#    runs-on: ubuntu-latest
-#    needs: train
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: 'Upload Artifact'
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: my-artifact
-#          path: models/1/model.ckpt
-#          retention-days: 5
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: BestModel
+          path: models/1/model.ckpt
+          retention-days: 5
