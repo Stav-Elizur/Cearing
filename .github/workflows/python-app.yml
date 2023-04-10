@@ -21,14 +21,15 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-      - uses: actions/cache@v3
-        id: cache-dependencies
-        with:
-          path: venv
-          key: ${{ runner.os }}-venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/*requirements.txt') }}
+      - uses: syphar/restore-virtualenv@v1
+        id: cache-virtualenv
+
+      - uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
 
       - name: Install dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           pwd
           python -m venv venv
@@ -65,6 +66,7 @@ jobs:
         run: |
           if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
             mkdir "$env:DATASET_CACHE_DIR"
+            ls
             ls venv/lib/python3.10/site-packages
             pwd
             python -m dataset.data
