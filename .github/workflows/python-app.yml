@@ -28,13 +28,6 @@ jobs:
         restore-keys: |
           dataset-${{ hashFiles('requirements.txt') }}
 
-    - name: Load dataset
-      run: |
-        if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
-          mkdir "$env:DATASET_CACHE_DIR"
-          python dataset/data.py
-        fi
-
     - uses: actions/checkout@v3
 
     - name: Set up Python 3.10
@@ -53,6 +46,13 @@ jobs:
         cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Load dataset
+      run: |
+        if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
+          mkdir "$env:DATASET_CACHE_DIR"
+          pwd
+          python dataset/data.py
+        fi
     - name: Run Train
       run: |
         python train.py
