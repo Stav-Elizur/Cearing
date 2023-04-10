@@ -5,12 +5,14 @@ name: Python application
 
 on:
   push:
-    branches: [ "model-implementation" ]
   pull_request:
     branches: [ "main" ]
 
 permissions:
   contents: read
+
+env:
+  DATASET_CACHE_DIR: ${{ runner.workspace }}/dataset_cache
 
 jobs:
   build:
@@ -18,9 +20,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - name: Cache dataset
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.DATASET_CACHE_DIR }}
+        key: dataset-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          dataset-${{ hashFiles('requirements.txt') }}
+
+    - name: Load dataset
+      run: |
+        if [ ! -d "$env:DATASET_CACHE_DIR" ]; then
+          mkdir "$env:DATASET_CACHE_DIR"
+          python data.py
+        fi
+
     - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+        - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+
       with:
         python-version: "3.10"
     - name: Install dependencies
@@ -33,11 +52,13 @@ jobs:
         touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
         cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: check things
-      run: |
-        ls /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google
-        pip show protobuf
-        which pip
     - name: Run Train
       run: |
         python train.py
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: models/1/model.ckpt
+        retention-days: 5

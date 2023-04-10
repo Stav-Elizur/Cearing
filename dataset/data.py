@@ -11,6 +11,7 @@ from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
 from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, TextPoseItem
+from train import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 
@@ -111,6 +112,9 @@ def pose_visualizer(pose: Pose, video_path: str):
 
 # # Example for the above code
 if __name__ == '__main__':
-    datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
-    pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
+    load_dataset(split="train",
+                 max_seq_size=MAX_SEQ_SIZE,
+                 components=DEFAULT_COMPONENTS)
+    # datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
+    # pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
     # print(load_dataset()[0].text)
