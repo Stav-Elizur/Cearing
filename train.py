@@ -10,12 +10,9 @@ from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
 from model.text_encoder import TextEncoderModel
 from data_tokenizers.hamnosys_tokenizer import HamNoSysTokenizer
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS, BATCH_SIZE
 from utils.train_utils import zero_pad_collator
 import pytorch_lightning as pl
-
-BATCH_SIZE = 64
-DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
-MAX_SEQ_SIZE = 200
 
 def main():
     train_dataset = load_dataset(split="train[10%:]",
