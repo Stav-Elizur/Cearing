@@ -113,7 +113,7 @@ def pose_visualizer(pose: Pose, video_path: str):
 
 # # Example for the above code
 if __name__ == '__main__':
-    load_dataset(split="train[:5%]",
+    load_dataset(split="train",
                  max_seq_size=MAX_SEQ_SIZE,
                  components=DEFAULT_COMPONENTS,
                  data_dir=DATA_DIR)

@@ -71,19 +71,22 @@ jobs:
             ${{ runner.os }}-dataset-
 
       - name: Load dataset
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          pwd
           ls ${{ env.DATASET_CACHE_DIR }}
-          echo "stav"
+          python -m dataset.data
 
-#      - name: Cache dataset
-#        uses: actions/cache@v2
-#        with:
-#          path: ${{ env.DATASET_CACHE_DIR }}
-#          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-dataset-
-#
+      - name: Cache dataset
+        uses: actions/cache@v2
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
+        with:
+          path: ${{ env.DATASET_CACHE_DIR }}
+          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-dataset-
+
 #  train:
 #    runs-on: ubuntu-latest
 #    needs: load_dataset
