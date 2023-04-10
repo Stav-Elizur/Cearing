@@ -16,11 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-          cache: 'pip' # caching pip dependencies
       - name: Install dependencies
         run: |
           pwd
@@ -32,7 +27,10 @@ jobs:
           touch /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
         with:
+          python-version: "3.10"
           cache: 'pip' # caching pip dependencies
   load_dataset:
     runs-on: ubuntu-latest
@@ -42,7 +40,6 @@ jobs:
       - name: Cache dataset
         uses: actions/cache@v2
         with:
-          cache: 'pip' # caching pip dependencies
           path: ${{ env.DATASET_CACHE_DIR }}
           key: dataset-${{ hashFiles('requirements.txt') }}
           restore-keys: |
