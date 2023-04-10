@@ -54,7 +54,7 @@ def main():
                         monitor='train_loss',
                         mode='min'))
 
-    trainer = pl.Trainer(max_epochs=5000, callbacks=callbacks, accelerator='cpu', devices=1)
+    trainer = pl.Trainer(max_epochs=3, callbacks=callbacks, accelerator='cpu', devices=1)
 
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=validation_loader)
 
