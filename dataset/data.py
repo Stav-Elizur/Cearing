@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import tensorflow_datasets as tfds
@@ -11,9 +12,6 @@ from tqdm import tqdm
 
 from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, TextPoseItem
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
-
-DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
-MAX_SEQ_SIZE = 1000
 
 
 def process_datum(datum: DataItemObject,
@@ -35,7 +33,7 @@ def process_datum(datum: DataItemObject,
             pose = pose.get_components(components)
 
         # Normalize pose element
-        # pose = pose.normalize(normalization_info)
+        pose = pose.normalize(normalization_info)
 
         # Zero confidence of legs component
         pose_hide_legs(pose)
@@ -60,40 +58,59 @@ def process_datum(datum: DataItemObject,
     return text_poses_datum
 
 
-def load_dataset(split="train") -> TextPoseDataset:
-    config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=25, include_pose="holistic")
+def load_dataset(split,
+                 max_seq_size,
+                 components) -> TextPoseDataset:
+    config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=None, include_pose="holistic")
 
     # Loading Dicta sign data set
-    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config},split=split)
+    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config}, split=split)
 
     # Read the header data according to pose body structure
-    with open("holistic.header", "rb") as buffer:
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(root_dir + "\holistic.header", "rb") as buffer:
         pose_header = PoseHeader.read(BufferReader(buffer.read()))
 
     normalization_info = pose_normalization_info(pose_header)
 
     # Get all data in english from train dataset
     dicta_sign_train = filter(lambda data_item: data_item['spoken_language'].numpy().decode('utf-8') == "en",
-                              dicta_sign["train"])
+                              dicta_sign)
 
-    # Convert list of list of TextPoseDatum to one list
+    # Convert list of TextPoseDatum to one list
     text_pose_data = [d for data_item in tqdm(dicta_sign_train) for d in process_datum(DataItemObject(**data_item),
                                                                                        pose_header,
                                                                                        normalization_info,
-                                                                                       DEFAULT_COMPONENTS) if
-                      d.length < MAX_SEQ_SIZE]
+                                                                                       components) if
+                      d.length < max_seq_size]
 
     return TextPoseDataset(text_pose_data)
 
 
 # Show video os specific pose via Pose API
 def pose_visualizer(pose: Pose, video_path: str):
-    p = PoseVisualizer(pose)
-    p.save_video(video_path, p.draw())
+    normalization_info = pose_normalization_info(pose.header)
+
+    # Normalize pose
+    pose = pose.normalize(normalization_info, scale_factor=100)
+    pose.focus()
+
+    if pose.header.dimensions.height % 2 == 1:
+        pose.header.dimensions.height += 1
+
+    if pose.header.dimensions.width % 2 == 1:
+        pose.header.dimensions.width += 1
+
+    if pose.header.dimensions.depth % 2 == 1:
+        pose.header.dimensions.depth += 1
+
+    # Draw original pose
+    p = PoseVisualizer(pose, thickness=2)
+    p.save_video(video_path, p.draw(), custom_ffmpeg="C:\\ffmpeg\\bin\\ffmpeg.exe")
 
 
-# Example for the above code
+# # Example for the above code
 if __name__ == '__main__':
-    datum: TextPoseItem = load_dataset()[0]
-    pose_visualizer(datum.pose.obj, "results/example-video2.mp4")
-    print(load_dataset()[0].text)
+    datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
+    pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
+    # print(load_dataset()[0].text)

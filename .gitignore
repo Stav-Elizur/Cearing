@@ -1,6 +1,9 @@
 *transcription-main/
 *datasets-master/
+*models/
 *idea/
 *__pycache__/
 *results/
 *.z01
+*lightning_logs/
+*videos/
