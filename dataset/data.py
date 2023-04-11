@@ -10,7 +10,8 @@ from pose_format.utils.reader import BufferReader
 from sign_language_datasets.datasets.config import SignDatasetConfig
 from tqdm import tqdm
 
-from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset, TextPoseItem
+from dataset.data_types import DataItemObject, TextPoseDatum, TextPoseDataset
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS, DATA_DIR
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 
 
@@ -60,15 +61,16 @@ def process_datum(datum: DataItemObject,
 
 def load_dataset(split,
                  max_seq_size,
-                 components) -> TextPoseDataset:
+                 components,
+                 data_dir) -> TextPoseDataset:
     config = SignDatasetConfig(name="cearing", version="1.0.0", include_video=False, fps=None, include_pose="holistic")
 
     # Loading Dicta sign data set
-    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config}, split=split)
+    dicta_sign = tfds.load(name='dicta_sign', builder_kwargs={"config": config}, split=split, data_dir=data_dir)
 
     # Read the header data according to pose body structure
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(root_dir + "\holistic.header", "rb") as buffer:
+    with open(root_dir + "/holistic.header", "rb") as buffer:
         pose_header = PoseHeader.read(BufferReader(buffer.read()))
 
     normalization_info = pose_normalization_info(pose_header)
@@ -111,6 +113,7 @@ def pose_visualizer(pose: Pose, video_path: str):
 
 # # Example for the above code
 if __name__ == '__main__':
-    datum: TextPoseItem = load_dataset(split="train[10%:]")[0]
-    pose_visualizer(datum["pose"]["obj"], "results/example-video.mp4")
-    # print(load_dataset()[0].text)
+    load_dataset(split="train",
+                 max_seq_size=MAX_SEQ_SIZE,
+                 components=DEFAULT_COMPONENTS,
+                 data_dir=DATA_DIR)
