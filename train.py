@@ -10,21 +10,20 @@ from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
 from model.text_encoder import TextEncoderModel
 from data_tokenizers.hamnosys_tokenizer import HamNoSysTokenizer
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS, BATCH_SIZE, DATA_DIR
 from utils.train_utils import zero_pad_collator
 import pytorch_lightning as pl
-
-BATCH_SIZE = 64
-DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"]
-MAX_SEQ_SIZE = 200
 
 def main():
     train_dataset = load_dataset(split="train[10%:]",
                                  max_seq_size=MAX_SEQ_SIZE,
-                                 components=DEFAULT_COMPONENTS)
+                                 components=DEFAULT_COMPONENTS,
+                                 data_dir=DATA_DIR)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=zero_pad_collator)
     validation_dataset = load_dataset(split="train[0%:10%]",
                                       max_seq_size=MAX_SEQ_SIZE,
-                                      components=DEFAULT_COMPONENTS)
+                                      components=DEFAULT_COMPONENTS,
+                                      data_dir=DATA_DIR)
     validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, collate_fn=zero_pad_collator)
 
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
@@ -57,7 +56,7 @@ def main():
                         monitor='train_loss',
                         mode='min'))
 
-    trainer = pl.Trainer(max_epochs=5000, callbacks=callbacks, accelerator='cpu', devices=1)
+    trainer = pl.Trainer(max_epochs=260, callbacks=callbacks, accelerator='cpu', devices=1)
 
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=validation_loader)
 

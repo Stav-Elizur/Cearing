@@ -13,7 +13,7 @@ from dataset.data import load_dataset
 from model.Iterative_decoder import IterativeGuidedPoseGenerationModel
 from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
-from train import MAX_SEQ_SIZE, DEFAULT_COMPONENTS
+from utils.constants import MAX_SEQ_SIZE, DEFAULT_COMPONENTS, DATA_DIR
 from utils.pose_utils import pose_normalization_info, pose_hide_legs
 from model.text_encoder import TextEncoderModel
 
@@ -68,7 +68,10 @@ def data_to_pose(pred_seq, pose_header: PoseHeader):
 if __name__ == '__main__':
 
     os.makedirs('predictions', exist_ok=True)
-    train_dataset = load_dataset(split="train[:1%]",max_seq_size=MAX_SEQ_SIZE,components=DEFAULT_COMPONENTS)
+    train_dataset = load_dataset(split="train[:1%]",
+                                 max_seq_size=MAX_SEQ_SIZE,
+                                 components=DEFAULT_COMPONENTS,
+                                 data_dir=DATA_DIR)
 
     _, num_pose_joints, num_pose_dims = train_dataset[0]["pose"]["data"].shape
     pose_header = train_dataset.data[0].pose.header
