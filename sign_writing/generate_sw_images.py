@@ -3,16 +3,15 @@ import zipfile
 import json
 import subprocess
 from typing import List
-
 import requests
 from tqdm import tqdm
 
 
 def fsw_init_package():
-    with zipfile.ZipFile('font-db-master.zip', 'r') as zip_ref:
+    with zipfile.ZipFile('font_db.zip', 'r') as zip_ref:
         zip_ref.extractall('sign_to_png')
 
-    subprocess.call('npm install', cwd='sign_to_png/font-db-master', shell=True)
+    subprocess.call('npm install', cwd='sign_to_png/font_db', shell=True)
 
 
 def clean_fsw_package():
@@ -57,7 +56,7 @@ def generate_images_from_sw():
             transcription = captions[1]['transcription']
 
             subprocess.call(f'node fsw/fsw-sign-png  {transcription} ../../photos_results/{uid}.png',
-                            cwd='sign_to_png/font-db-master', shell=True)
+                            cwd='sign_to_png/font_db', shell=True)
             json.dump(result, target_file)
             target_file.write('\n')
 

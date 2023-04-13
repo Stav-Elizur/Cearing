@@ -47,74 +47,100 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dependencies-
 
-  load_dataset:
-    runs-on: ubuntu-latest
-    needs: install_dependencies
-    steps:
-      - uses: actions/checkout@v3
+fixed_dataset:
+  runs-on: ubuntu-latest
+  needs: install_dependencies
+  steps:
+    - uses: actions/checkout@v3
 
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
+    - name: Restore cached dependencies
+      uses: actions/cache@v2
+      with:
+        path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+        key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-dependencies-
 
-      - name: Restore dataset
-        uses: actions/cache@v2
-        id: cache-dataset
-        with:
-          path: ${{ env.DATASET_CACHE_DIR }}
-          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: ''
+    - name: Generate Photos
+      run: |
+        export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+        python -m
 
-      - name: Load dataset
-        if: steps.cache-dataset.outputs.cache-hit != 'true'
-        run: |
-          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          python -m dataset.data
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: BestModel
+        path: models/1/model.ckpt
+        retention-days: 5
 
-      - name: Cache dataset
-        uses: actions/cache@v2
-        if: steps.cache-dataset.outputs.cache-hit != 'true'
-        with:
-          path: ${{ env.DATASET_CACHE_DIR }}
-          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dataset-
-
-  train:
-    runs-on: ubuntu-latest
-    needs: load_dataset
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
-
-      - name: Restore dataset
-        uses: actions/cache@v2
-        id: cache-dataset
-        with:
-          path: ${{ env.DATASET_CACHE_DIR }}
-          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dataset-
-
-      - name: Run Train
-        run: |
-          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          python -m train
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: BestModel
-          path: models/1/model.ckpt
-          retention-days: 5
+#  load_dataset:
+#    runs-on: ubuntu-latest
+#    needs: install_dependencies
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Restore cached dependencies
+#        uses: actions/cache@v2
+#        with:
+#          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+#          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-dependencies-
+#
+#      - name: Restore dataset
+#        uses: actions/cache@v2
+#        id: cache-dataset
+#        with:
+#          path: ${{ env.DATASET_CACHE_DIR }}
+#          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: ''
+#
+#      - name: Load dataset
+#        if: steps.cache-dataset.outputs.cache-hit != 'true'
+#        run: |
+#          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+#          python -m dataset.data
+#
+#      - name: Cache dataset
+#        uses: actions/cache@v2
+#        if: steps.cache-dataset.outputs.cache-hit != 'true'
+#        with:
+#          path: ${{ env.DATASET_CACHE_DIR }}
+#          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-dataset-
+#
+#  train:
+#    runs-on: ubuntu-latest
+#    needs: load_dataset
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Restore cached dependencies
+#        uses: actions/cache@v2
+#        with:
+#          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+#          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-dependencies-
+#
+#      - name: Restore dataset
+#        uses: actions/cache@v2
+#        id: cache-dataset
+#        with:
+#          path: ${{ env.DATASET_CACHE_DIR }}
+#          key: ${{ runner.os }}-dataset-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-dataset-
+#
+#      - name: Run Train
+#        run: |
+#          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+#          python -m train
+#
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: BestModel
+#          path: models/1/model.ckpt
+#          retention-days: 5
