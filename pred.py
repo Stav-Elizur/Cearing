@@ -67,7 +67,6 @@ def data_to_pose(pred_seq, pose_header: PoseHeader):
 
 if __name__ == '__main__':
 
-    os.makedirs('predictions', exist_ok=True)
     train_dataset = load_dataset(split="train[:1%]",
                                  max_seq_size=MAX_SEQ_SIZE,
                                  components=DEFAULT_COMPONENTS,
