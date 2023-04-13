@@ -36,7 +36,7 @@ def generate_images_from_sw():
         json_list = list(json_file)
 
     with open('fixed_signsuisse.jsonl','w') as target_file:
-        for json_str in tqdm(json_list[1 * 6070: 2 * 6070]):
+        for json_str in tqdm(json_list[2 * 6070: 3 * 6070]):
             result = json.loads(json_str)
 
             captions: List[dict] = result['captions']
