@@ -35,8 +35,9 @@ def generate_images_from_sw():
     with open('signsuisse_source.jsonl', 'r') as json_file:
         json_list = list(json_file)
 
+    num_of_files = 0
     with open('fixed_signsuisse.jsonl','w') as target_file:
-        for json_str in tqdm(json_list[5 * 6070: 6 * 6070]):
+        for json_str in tqdm(json_list):
             result = json.loads(json_str)
 
             captions: List[dict] = result['captions']
@@ -56,11 +57,19 @@ def generate_images_from_sw():
 
                 captions.append({"language": "Sgnw", "transcription": encoded_sw})
 
-            transcription = captions[1]['transcription']
+            transcriptions = captions[1]['transcription']
 
-            subprocess.call(f'node fsw/fsw-sign-png  {transcription} ../../photos_results/{uid}.png',
-                            cwd='sign_to_png/font_db', shell=True)
-            json.dump(result, target_file)
+            for i, transcription in enumerate(transcriptions.split(' ')):
+                subprocess.call(f'node fsw/fsw-sign-png  {transcription} ../../photos_results/{uid}-{i}.png',
+                                cwd='sign_to_png/font_db', shell=True)
+                json.dump(result, target_file)
+
+            files = os.listdir('photos_results/')
+            if len(files) != (num_of_files + len(transcriptions.split(' '))):
+                print("ERROR: Don't generate a file")
+                exit(1)
+
+            num_of_files += len(transcriptions.split(' '))
             target_file.write('\n')
 
 
