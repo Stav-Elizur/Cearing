@@ -64,7 +64,9 @@ jobs:
       - name: Generate Photos
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          python -m sign_writing.generate_sw_images
+          cd sign_writing
+          ls
+          python -m generate_sw_images
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2

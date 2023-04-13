@@ -8,6 +8,9 @@ from tqdm import tqdm
 
 
 def fsw_init_package():
+    if not os.path.exists('sign_to_png/font_db'):
+        os.makedirs('sign_to_png/font_db')
+
     with zipfile.ZipFile('font_db.zip', 'r') as zip_ref:
         zip_ref.extractall('sign_to_png')
 
