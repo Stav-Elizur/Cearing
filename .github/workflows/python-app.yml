@@ -38,29 +38,6 @@ jobs:
           cp builder.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
-
-  fixed_dataset:
-    runs-on: ubuntu-latest
-    needs: install_dependencies
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-dependencies-
-
       - name: Generate Photos
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
