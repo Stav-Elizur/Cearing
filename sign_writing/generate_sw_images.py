@@ -62,7 +62,6 @@ def generate_images_from_sw():
                             cwd='sign_to_png/font_db', shell=True)
             json.dump(result, target_file)
             target_file.write('\n')
-            break
 
 
 if __name__ == '__main__':
