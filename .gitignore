@@ -7,3 +7,5 @@
 *.z01
 *lightning_logs/
 *videos/
+*sign-writing/sign_to_png/
+*sign-writing/photos_results/
