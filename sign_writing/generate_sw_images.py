@@ -51,7 +51,6 @@ def generate_images_from_sw():
                     "country_code": country_code,
                     "language_code": language_code,
                     "text": transcription,
-                    "n_best": 1,
                     "translation_type": "sent"
                 })
 
@@ -72,8 +71,40 @@ def generate_images_from_sw():
             num_of_files += len(transcriptions.split(' '))
             target_file.write('\n')
 
+def generate_images_from_sign_bank():
+    import sign_language_datasets.datasets
+    import tensorflow_datasets as tfds
+    import itertools
+    import shutil
+
+    if os.path.exists('photos_signbank_results'):
+        shutil.rmtree('photos_signbank_results')
+
+    os.mkdir('photos_signbank_results')
+
+    signbank = tfds.load(name='sign_bank')
+    signbank_train = list(filter(lambda datum: (len(datum['sign_writing'].numpy()) == 1) and
+                                               (len(datum['sign_writing'].numpy()[0].decode('utf-8').split(' ')) == 1),
+                                 tqdm(signbank['train'])))
+    print(f'num of data: {len(signbank_train)}')
+
+    num_of_files = 0
+    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
+        sign_writing: List[bytes] = datum['sign_writing'].numpy()
+
+        subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0]} ../../photos_signbank_results/{uid}.png',
+                        cwd='sign_to_png/font_db', shell=True)
+
+        files = os.listdir('photos_signbank_results/')
+        if len(files) != (num_of_files + 1):
+            print("ERROR: Don't generate a file")
+            exit(1)
+
+        num_of_files += 1
+
 
 if __name__ == '__main__':
     fsw_init_package()
-    generate_images_from_sw()
+    generate_images_from_sign_bank()
+    # generate_images_from_sw()
     clean_fsw_package()
