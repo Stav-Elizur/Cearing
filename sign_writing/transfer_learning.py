@@ -7,7 +7,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 import torchvision
 
-#TODO: debug model and functions, change DIR of data loaders, and add KNN
+#TODO: debug model and functions, change DIR of ddata loaders, and add KNN
 
 def handle_pretrained_model():
     vgg_model = models.vgg19(pretrained=True)
