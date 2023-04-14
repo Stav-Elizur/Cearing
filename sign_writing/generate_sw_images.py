@@ -76,7 +76,6 @@ def generate_images_from_sign_bank():
     import tensorflow_datasets as tfds
     import itertools
     import shutil
-    import hashlib
 
     if os.path.exists('photos_signbank_results'):
         shutil.rmtree('photos_signbank_results')
@@ -90,15 +89,20 @@ def generate_images_from_sign_bank():
     print(f'num of data: {len(signbank_train)}')
 
     num_of_files = 0
-    for datum in tqdm(itertools.islice(signbank_train, num_of_files, min(len(signbank_train), 10000))):
+    generate_from = 0
+    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, generate_from, 5000)),
+                                generate_from):
         sign_writing: List[bytes] = datum['sign_writing'].numpy()
-        uid = hashlib.sha256(sign_writing[0]).hexdigest()
 
         subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0]} ../../photos_signbank_results/{uid}.png',
                         cwd='sign_to_png/font_db', shell=True)
 
+        files = os.listdir('photos_signbank_results/')
+        if len(files) != (num_of_files + 1):
+            print("ERROR: Don't generate a file")
+            exit(1)
+
         num_of_files += 1
-        break
 
 
 if __name__ == '__main__':
