@@ -2,11 +2,9 @@ import os
 import json
 import shutil
 import zipfile
-import tqdm
 import torch
 import clip
 import numpy as np
-
 from PIL import Image
 from tqdm import tqdm
 
@@ -16,7 +14,7 @@ def generate_labeling(image_dir):
     model, preprocess = clip.load("ViT-B/32", device=device)
 
     sign_images_json = []
-    for image_file in tqdm.tqdm(os.listdir(image_dir)):
+    for image_file in tqdm(os.listdir(image_dir)):
         image_processed = preprocess(Image.open(os.path.join(image_dir, image_file))).unsqueeze(0).to(device)
 
         with torch.no_grad():
@@ -37,12 +35,12 @@ def diff_images(image_dir):
         b = np.array(data[1]['label']).flatten()
         c = np.array(data[2]['label']).flatten()
         d = np.array(data[3]['label']).flatten()
-        diff(a,b)
-        diff(a,c,True)
-        diff(b,c)
-        diff(a,d)
-        diff(b,d)
-        diff(c,d)
+        diff(a, b)
+        diff(a, c, True)
+        diff(b, c)
+        diff(a, d)
+        diff(b, d)
+        diff(c, d)
 
 
 def diff(a, b, similar=False):
@@ -66,7 +64,7 @@ if __name__ == "__main__":
         os.makedirs('images')
 
     with zipfile.ZipFile('images.zip', 'r') as zip_ref:
-        zip_ref.extractall('')
+        zip_ref.extractall('images')
 
     generate_labeling("images")
     shutil.rmtree('images')

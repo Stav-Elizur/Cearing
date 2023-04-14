@@ -5,7 +5,7 @@ vidgear==0.3.0
 pose-format==0.2.1
 fontTools~=4.39.3
 tqdm~=4.64.1
-torch~=2.0.0
+torch~=1.10.1
 python-dotenv~=0.21.0
 opencv-python~=4.5.5.64
 setuptools~=57.4.0
