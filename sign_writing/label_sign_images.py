@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 import zipfile
-
+import tqdm
 import torch
 import clip
 import numpy as np
@@ -15,13 +15,14 @@ def generate_labeling(image_dir):
     model, preprocess = clip.load("ViT-B/32", device=device)
 
     sign_images_json = []
-    for image_file in os.listdir(image_dir):
+    for image_file in tqdm.tqdm(os.listdir(image_dir)):
+
         image_processed = preprocess(Image.open(os.path.join(image_dir, image_file))).unsqueeze(0).to(device)
 
         with torch.no_grad():
             image_features = model.encode_image(image_processed)
             sign_images_json.append({"id": image_file, "label": image_features.tolist()})
-    with open('image_encodings_albert.json', 'w') as f:
+    with open('image_encodings.json', 'w') as f:
         json.dump(json.dumps(sign_images_json), f)
 
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
         os.makedirs('images')
 
     with zipfile.ZipFile('images.zip', 'r') as zip_ref:
-        zip_ref.extractall('images')
+        zip_ref.extractall('')
 
     generate_labeling("images")
     shutil.rmtree('images')
