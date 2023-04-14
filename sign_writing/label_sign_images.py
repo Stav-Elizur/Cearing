@@ -8,6 +8,7 @@ import clip
 import numpy as np
 
 from PIL import Image
+from tqdm import tqdm
 
 
 def generate_labeling(image_dir):
@@ -57,7 +58,7 @@ def diff(a, b, similar=False):
     # Calculate the cosine similarity
     cosine_similarity = dot_product / (magnitude_a * magnitude_b)
 
-    print("Need to be ", sim," Similiar", cosine_similarity)
+    print("Need to be ", sim, " Similiar", cosine_similarity)
 
 
 if __name__ == "__main__":

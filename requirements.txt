@@ -17,4 +17,4 @@ lxml~=4.9.2
 pytorch-lightning~=2.0.1
 Pillow~=9.5.0
 transformers~=4.28.0
-clip~=1.0
+git+https://github.com/openai/CLIP.git

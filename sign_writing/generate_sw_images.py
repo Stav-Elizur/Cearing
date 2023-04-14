@@ -92,7 +92,7 @@ def generate_images_from_sign_bank():
     for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
         sign_writing: List[bytes] = datum['sign_writing'].numpy()
 
-        subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0]} ../../photos_signbank_results/{uid}.png',
+        subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0].decode("utf-8")} ../../photos_signbank_results/{uid}.png',
                         cwd='sign_to_png/font_db', shell=True)
 
         files = os.listdir('photos_signbank_results/')
