@@ -89,8 +89,8 @@ def generate_images_from_sign_bank():
     print(f'num of data: {len(signbank_train)}')
 
     num_of_files = 0
-    generate_from = 0
-    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, generate_from, 5000)),
+    generate_from = 5000
+    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, generate_from, 10000)),
                                 generate_from):
         sign_writing: List[bytes] = datum['sign_writing'].numpy()
 
