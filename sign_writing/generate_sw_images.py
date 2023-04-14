@@ -89,9 +89,7 @@ def generate_images_from_sign_bank():
     print(f'num of data: {len(signbank_train)}')
 
     num_of_files = 0
-    generate_from = 5000
-    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, generate_from, 10000)),
-                                generate_from):
+    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
         sign_writing: List[bytes] = datum['sign_writing'].numpy()
 
         subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0]} ../../photos_signbank_results/{uid}.png',
