@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: BestModel
-          path: sign_writing/photos_results
+          path: sign_writing/photos_signbank_results
           retention-days: 5
 
 #  load_dataset:
