@@ -7,9 +7,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 import torchvision
 
-# TODO: Get only feature extraction layers , need to check if it`s working
-# TODO: debug the flow maybe (label.data) if it`s not working and add KNN classifier(Easy)
-# TODO: check the paths in data loader function
+
 
 def handle_pretrained_model():
     vgg_model = models.vgg19(pretrained=True)
