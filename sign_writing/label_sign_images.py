@@ -1,5 +1,8 @@
 import os
 import json
+import shutil
+import zipfile
+
 import torch
 import clip
 import numpy as np
@@ -19,7 +22,9 @@ def generate_labeling(image_dir):
             image_features = model.encode_image(image_processed)
             sign_images_json.append({"id": image_file, "label": image_features.tolist()})
     with open('image_encodings_albert.json', 'w') as f:
-        json.dump(json.dumps(sign_images_json),f)
+        json.dump(json.dumps(sign_images_json), f)
+
+
 def diff_images(image_dir):
     with open(image_dir) as f:
         data = json.loads(json.load(f))
@@ -39,7 +44,6 @@ def diff_images(image_dir):
         diff(c,d)
 
 
-
 def diff(a, b, similar=False):
     sim = ""
     if similar is not True:
@@ -56,8 +60,12 @@ def diff(a, b, similar=False):
     print("Need to be ", sim," Similiar", cosine_similarity)
 
 
-
-
 if __name__ == "__main__":
-    # generate_labeling("albert")
-    diff_images("image_encodings_albert.json")
+    if not os.path.exists('images'):
+        os.makedirs('images')
+
+    with zipfile.ZipFile('images.zip', 'r') as zip_ref:
+        zip_ref.extractall('images')
+
+    generate_labeling("images")
+    shutil.rmtree('images')
