@@ -13,6 +13,8 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torchvision
+from torchsummary import summary
+
 
 from sign_writing.JsonDataset import JsonlDataset
 
@@ -51,7 +53,7 @@ def split_into_train_and_test():
     os.makedirs(test_path, exist_ok=True)
 
     # Copy the files into the two folders based on the percentages
-    for i, file_name in enumerate(tqdm(all_files)):
+    for i, file_name in enumerate(tqdm.tqdm(all_files)):
         if i < num_files_folder1:
             shutil.copy2(os.path.join(images_path, file_name), train_path)
         else:
@@ -63,13 +65,8 @@ def handle_pretrained_model():
     features = vgg_model.features
 
     for param in vgg_model.parameters():
-        param.requires_grad = False
-
-    # num_features = vgg_model.classifier[-1].in_features
-    # features = list(vgg_model.classifier.children())[:-1]  # Remove the last layer
-    # features.extend([nn.Linear(num_features, 2)])  # Add our own custom layer
-    # vgg_model.classifier = nn.Sequential(*features)
-    feature_extractor = nn.Sequential(features, nn.Flatten())
+        param.requires_grad = True
+    feature_extractor = nn.Sequential(features,nn.MaxPool2d(7),nn.Flatten())
 
     return feature_extractor
 
@@ -88,8 +85,8 @@ def preprocessing(batch_size=32):
 
     # train_dataset = torchvision.datasets.ImageFolder('train/', train_transforms)
     # test_dataset = torchvision.datasets.ImageFolder('test/', test_transforms)
-    train_dataset = JsonlDataset("train")
-    test_dataset = JsonlDataset("test")
+    train_dataset = JsonlDataset("images/train")
+    test_dataset = JsonlDataset("images/test")
 
     # loader = data.DataLoader(dataset, batch_size=32, shuffle=True)
 
@@ -114,9 +111,13 @@ def train(model, device, optimizer, scheduler, train_loader, test_loader, criter
 
             running_loss = 0.0
             running_corrects = 0
+            i = 0
             for inputs, labels in data_loader:
+                i += 1
+                print("In iteration: ", i)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
+                labels = labels.squeeze(1)
 
                 optimizer.zero_grad()
 
@@ -131,13 +132,13 @@ def train(model, device, optimizer, scheduler, train_loader, test_loader, criter
                         optimizer.step()
 
                 running_loss += loss.item() * inputs.size(0)
-                running_corrects += torch.sum(preds == labels.data)
+                running_corrects += torch.sum(outputs.data == labels.data)
 
             if phase == 'train':
                 scheduler.step()
 
-            epoch_loss = running_loss / len(data_loader)
-            epoch_acc = running_corrects.double() / len(data_loader)
+            epoch_loss = running_loss / len(data_loader)*32
+            epoch_acc = running_corrects.double() / len(data_loader)*32
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
 
@@ -147,24 +148,26 @@ def train(model, device, optimizer, scheduler, train_loader, test_loader, criter
 
 
 def transfer_learning():
+    # split_into_train_and_test()
     vgg_model = handle_pretrained_model()
 
-    # criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(vgg_model.classifier.parameters(), lr=0.001, momentum=0.9)
-    # exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
-    #
-    # batch_size=32
-    # num_epochs = 10
-    #
-    # train_loader,test_loader = preprocessing(batch_size=batch_size)
-    #
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # vgg_model = vgg_model.to(device)
-    #
-    # model = train(model=vgg_model,scheduler = exp_lr_scheduler,train_loader=train_loader,
-    #               test_loader=test_loader,device= device,
-    #             optimizer=optimizer,criterion=criterion,
-    #             num_epochs=num_epochs)
+
+    criterion = nn.MSELoss()
+    optimizer = optim.SGD(vgg_model.parameters(), lr=0.001, momentum=0.9)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+
+    batch_size=32
+    num_epochs = 10
+
+    train_loader,test_loader = preprocessing(batch_size=batch_size)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    vgg_model = vgg_model.to(device)
+
+    model = train(model=vgg_model,scheduler = exp_lr_scheduler,train_loader=train_loader,
+                  test_loader=test_loader,device= device,
+                optimizer=optimizer,criterion=criterion,
+                num_epochs=num_epochs)
 
 
 if __name__ == "__main__":
