@@ -111,10 +111,7 @@ def train(model, device, optimizer, scheduler, train_loader, test_loader, criter
 
             running_loss = 0.0
             running_corrects = 0
-            i = 0
             for inputs, labels in data_loader:
-                i += 1
-                print("In iteration: ", i)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 labels = labels.squeeze(1)
