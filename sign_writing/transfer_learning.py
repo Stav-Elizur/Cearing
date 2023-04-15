@@ -1,8 +1,11 @@
 import json
 import zipfile
-
+import os
+import random
+import shutil
 import torch
 import torch.nn as nn
+import tqdm
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
@@ -15,6 +18,45 @@ from sign_writing.JsonDataset import JsonlDataset
 
 
 # TODO: debug model and functions, change DIR of data loaders, and add KNN
+def split_into_train_and_test():
+    # user defined function to shuffle
+    def shuffle_function():
+        return 0.5
+
+    # Set the path of the folder you want to split
+    images_path = "images"
+
+    if not os.path.exists(images_path):
+        os.makedirs(images_path)
+
+    with zipfile.ZipFile(f'{images_path}.zip', 'r') as zip_ref:
+        zip_ref.extractall(images_path)
+
+    # Set the percentage of files you want in each folder
+    train_percent = 90
+
+    # Get a list of all the files in the folder
+    all_files = os.listdir(images_path)
+
+    # Calculate the number of files for each folder based on the percentage
+    num_files_folder1 = int(len(all_files) * (train_percent / 100))
+
+    # Shuffle the list of files randomly
+    random.shuffle(all_files, shuffle_function)
+
+    # Create the two folders to store the files
+    train_path = os.path.join(images_path, "train")
+    test_path = os.path.join(images_path, "test")
+    os.makedirs(train_path, exist_ok=True)
+    os.makedirs(test_path, exist_ok=True)
+
+    # Copy the files into the two folders based on the percentages
+    for i, file_name in enumerate(tqdm(all_files)):
+        if i < num_files_folder1:
+            shutil.copy2(os.path.join(images_path, file_name), train_path)
+        else:
+            shutil.copy2(os.path.join(images_path, file_name), test_path)
+        os.remove(os.path.join(images_path, file_name))
 
 def handle_pretrained_model():
     vgg_model = models.vgg19(pretrained=True)
