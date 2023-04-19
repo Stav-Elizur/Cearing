@@ -60,6 +60,10 @@ def diff(a, b, similar=False):
 
 
 if __name__ == "__main__":
+    x = os.getcwd()
+    print(x)
+    x = os.listdir(x)
+    print(x)
     if not os.path.exists('images'):
         os.makedirs('images')
 
