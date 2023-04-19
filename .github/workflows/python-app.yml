@@ -56,7 +56,6 @@ jobs:
       - name: Generate Json
         run: |
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
-          cd ..
           python -m sign_writing.label_sign_images
 
       - name: Upload Artifact
