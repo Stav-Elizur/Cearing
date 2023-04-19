@@ -114,7 +114,7 @@ if __name__ == '__main__':
     import os.path
 
     # Creating the ZIP file
-    archived = shutil.make_archive('images', 'zip', 'images')
+    archived = shutil.make_archive('images', 'zip', 'photos_signbank_results')
 
     if os.path.exists('images.zip'):
         print(archived)
