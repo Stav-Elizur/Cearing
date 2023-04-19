@@ -99,6 +99,7 @@ def generate_images_from_sign_bank():
         if len(files) != (num_of_files + 1):
             print("ERROR: Don't generate a file")
             exit(1)
+        break
 
         num_of_files += 1
 
@@ -108,3 +109,14 @@ if __name__ == '__main__':
     generate_images_from_sign_bank()
     # generate_images_from_sw()
     clean_fsw_package()
+
+    import shutil
+    import os.path
+
+    # Creating the ZIP file
+    archived = shutil.make_archive('images', 'zip', 'images')
+
+    if os.path.exists('images.zip'):
+        print(archived)
+    else:
+        print("ZIP file not created")

@@ -44,11 +44,24 @@ jobs:
           cd sign_writing
           python -m generate_sw_images
 
+      - name: Generate Photos
+        run: |
+          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/
+          cd ..
+          python -m sign_writing.label_sign_images
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: BestModel
-          path: sign_writing/photos_signbank_results
+          name: images
+          path: sign_writing/images.zip
+          retention-days: 5
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: image_encodings
+          path: sign_writing/image_encodings.json
           retention-days: 5
 
 #  load_dataset:
