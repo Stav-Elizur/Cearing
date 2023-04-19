@@ -99,7 +99,9 @@ def generate_images_from_sign_bank():
         if len(files) != (num_of_files + 1):
             print("ERROR: Don't generate a file")
             exit(1)
-        break
+
+        if uid == 99:
+            break
 
         num_of_files += 1
 
