@@ -89,21 +89,37 @@ def generate_images_from_sign_bank():
     print(f'num of data: {len(signbank_train)}')
 
     num_of_files = 0
-    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
-        sign_writing: List[bytes] = datum['sign_writing'].numpy()
+    with open('images_info.json', 'w') as info_file:
+        for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
+            sign_writing: List[bytes] = datum['sign_writing'].numpy()
 
-        subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0].decode("utf-8")} ../../photos_signbank_results/{uid}.png',
-                        cwd='sign_to_png/font_db', shell=True)
+            subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0].decode("utf-8")} ../../photos_signbank_results/{uid}.png',
+                            cwd='sign_to_png/font_db', shell=True)
 
-        files = os.listdir('photos_signbank_results/')
-        if len(files) != (num_of_files + 1):
-            print("ERROR: Don't generate a file")
-            exit(1)
+            files = os.listdir('photos_signbank_results/')
+            if len(files) != (num_of_files + 1):
+                print("ERROR: Don't generate a file")
+                exit(1)
 
-        if uid == 99:
-            break
+            datum_info = {
+                'assumed_spoken_language_code': datum['assumed_spoken_language_code'].numpy().decode('utf-8'),
+                'country_code': datum['country_code'].numpy().decode('utf-8'),
+                'created_date': datum['created_date'].numpy().decode('utf-8'),
+                'id': datum['id'].numpy().decode('utf-8'),
+                'modified_date': datum['modified_date'].numpy().decode('utf-8'),
+                'puddle': datum['puddle'].numpy().item(),
+                'sign_writing': [f.decode('utf-8') for f in datum['sign_writing'].numpy()],
+                'terms': [f.decode('utf-8') for f in datum['terms'].numpy()],
+                'user': datum['user'].numpy().decode('utf-8'),
+                'uid': uid
+            }
 
-        num_of_files += 1
+            json.dump(json.dumps(datum_info), info_file)
+
+            if uid == 99:
+                break
+
+            num_of_files += 1
 
 
 if __name__ == '__main__':

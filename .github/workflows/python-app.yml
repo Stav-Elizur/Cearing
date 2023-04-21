@@ -73,6 +73,13 @@ jobs:
           path: sign_writing/image_encodings.json
           retention-days: 5
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: images_info
+          path: sign_writing/images_info.json
+          retention-days: 5
+
 #  load_dataset:
 #    runs-on: ubuntu-latest
 #    needs: install_dependencies
