@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 
 
 class JsonlDataset(data.Dataset):
-    def __init__(self, dir_path):
+    def __init__(self, dir_path,):
         self.dir_path = dir_path
         self.image_encodings = []
         with zipfile.ZipFile('image_encodings.zip', 'r') as zip_ref:

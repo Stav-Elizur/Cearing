@@ -104,7 +104,7 @@ def train(model,
 
             running_loss = 0.0
             running_corrects: torch.Tensor = torch.zeros(batch_size,
-                                                         len(train_loader.dataset.image_encodings[0]['label'][0]))
+                                                         len(train_loader.dataset.image_info[0]['label'][0]))
             for inputs, labels in tqdm(data_loader):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
