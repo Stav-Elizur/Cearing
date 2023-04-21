@@ -116,9 +116,6 @@ def generate_images_from_sign_bank():
 
             json.dump(json.dumps(datum_info), info_file)
 
-            if uid == 99:
-                break
-
             num_of_files += 1
 
 
