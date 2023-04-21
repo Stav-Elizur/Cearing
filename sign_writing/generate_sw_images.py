@@ -11,10 +11,10 @@ def fsw_init_package():
     if not os.path.exists('sign_to_png/font_db'):
         os.makedirs('sign_to_png/font_db')
 
-    with zipfile.ZipFile('font_db.zip', 'r') as zip_ref:
-        zip_ref.extractall('sign_to_png')
+        with zipfile.ZipFile('font_db.zip', 'r') as zip_ref:
+            zip_ref.extractall('sign_to_png')
 
-    subprocess.call('npm install', cwd='sign_to_png/font_db', shell=True)
+        subprocess.call('npm install', cwd='sign_to_png/font_db', shell=True)
 
 
 def clean_fsw_package():
@@ -71,6 +71,7 @@ def generate_images_from_sw():
             num_of_files += len(transcriptions.split(' '))
             target_file.write('\n')
 
+
 def generate_images_from_sign_bank():
     import sign_language_datasets.datasets
     import tensorflow_datasets as tfds
@@ -89,7 +90,7 @@ def generate_images_from_sign_bank():
     print(f'num of data: {len(signbank_train)}')
 
     num_of_files = 0
-    with open('images_info.json', 'w') as info_file:
+    with open('images_info.jsonl', 'w') as info_file:
         for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
             sign_writing: List[bytes] = datum['sign_writing'].numpy()
 
@@ -114,7 +115,8 @@ def generate_images_from_sign_bank():
                 'uid': uid
             }
 
-            json.dump(json.dumps(datum_info), info_file)
+            json_string = json.dumps(datum_info)
+            info_file.write(json_string + '\n')
 
             num_of_files += 1
 
