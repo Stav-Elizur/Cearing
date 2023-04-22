@@ -17,5 +17,6 @@
 *sign_writing/fixed_signsuisse.jsonl
 *sign_writing/image_encodings.json
 *sign_writing/clip_fine_tuning/image_encodings.json
+*sign_writing/clip_fine_tuning/images_info.jsonl
 
 *dataset/dataset_cached/

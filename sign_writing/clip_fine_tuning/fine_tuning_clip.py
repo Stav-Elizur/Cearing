@@ -3,7 +3,7 @@ import shutil
 import zipfile
 import random
 
-from torch.nn import TripletMarginLoss
+from torch.nn import CrossEntropyLoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import CLIPProcessor, CLIPModel, CLIPTokenizer
@@ -103,8 +103,10 @@ if __name__ == '__main__':
 
     # Train the model
     for epoch in range(10):
-        loss = train(model=model, clip_processor=processor, optimizer=optimizer, dataloader=train_loader,loss_fn=triplet_loss)
+        loss = train(model=model, clip_processor=processor, optimizer=optimizer, dataloader=train_loader,loss_fn=CrossEntropyLoss())
         print(f'Epoch {epoch}: loss={loss:.4f}')
 
     # Save the fine-tuned model
     torch.save(model.state_dict(), 'fine-tuned-clip-model.pth')
+    shutil.rmtree('images')
+    os.remove("images_info.jsonl")

@@ -1,4 +1,6 @@
 import os
+import zipfile
+
 import torch.utils.data as data
 import json
 from PIL import Image
@@ -15,8 +17,15 @@ class ClipSWDataset(data.Dataset):
         self.image_info = []
         self.processor = processor
         self.tokenizer = tokenizer
-        with open('images_info.json') as f:
-            self.image_info: list = json.load(f)
+
+        if not os.path.isfile('images_info.jsonl'):
+            with zipfile.ZipFile('images_info.zip', 'r') as zip_ref:
+                zip_ref.extractall('')
+
+        with open('images_info.jsonl') as f:
+            self.image_info = list(f)
+            self.image_info = [json.loads(s) for s in self.image_info]
+
         self.image_info = list(
             filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png"))
                                       and len(image_info['terms']) > 1
