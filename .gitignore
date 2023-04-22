@@ -15,8 +15,8 @@
 *sign_writing/photos_results/
 *sign_writing/photos_signbank_results/
 *sign_writing/fixed_signsuisse.jsonl
-*sign_writing/image_encodings.json
-*sign_writing/clip_fine_tuning/image_encodings.json
+*sign_writing/image_encodings.jsonl
+*sign_writing/clip_fine_tuning/image_encodings.jsonl
 *sign_writing/clip_fine_tuning/images_info.jsonl
 *sign_writing/images_info.jsonl
 
