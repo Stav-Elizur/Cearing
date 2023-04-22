@@ -1,4 +1,6 @@
 import os
+import zipfile
+
 import torch.utils.data as data
 import torch
 import json
@@ -10,8 +12,15 @@ class ClipSWDataset(data.Dataset):
     def __init__(self, dir_path):
         self.dir_path = dir_path
         self.image_info = []
-        with open('images_info.json') as f:
-            self.image_info: list = json.load(f)
+
+        if not os.path.isfile('images_info.jsonl'):
+            with zipfile.ZipFile('images_info.zip', 'r') as zip_ref:
+                zip_ref.extractall('')
+
+        with open('images_info.jsonl') as f:
+            self.image_info = list(f)
+            self.image_info = [json.loads(s) for s in self.image_info]
+
         self.image_info = list(filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png")) and len(image_info['terms']) > 1,
                                       self.image_info))
 
@@ -29,6 +38,5 @@ class ClipSWDataset(data.Dataset):
         curr_img = Image.open(os.path.join(self.dir_path, f"{data_dict['uid']}.png"))
         image_tensor = preprocess_transforms(curr_img)
         label_tensor = data_dict["terms"][1]
-        if not isinstance(label_tensor,str):
-            print('ss')
+
         return image_tensor, label_tensor

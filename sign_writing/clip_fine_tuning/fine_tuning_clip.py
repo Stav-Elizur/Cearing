@@ -100,8 +100,12 @@ class ClipSWDataCollator:
 
         # Add pixel_values to the inputs dictionary
         inputs['pixel_values'] = torch.stack(images)
+        labels = [torch.tensor(label.split(), dtype=torch.float32) for label in labels]
+
+        inputs['labels'] = torch.stack(labels)
 
         return inputs
+
 
 if __name__ == '__main__':
     model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')
@@ -146,3 +150,5 @@ if __name__ == '__main__':
 
     # Save the fine-tuned model
     torch.save(model.state_dict(), 'fine-tuned-clip-model.pth')
+    shutil.rmtree('images')
+    os.remove("images_info.jsonl")
