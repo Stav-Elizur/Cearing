@@ -87,8 +87,7 @@ def generate_images_from_sign_bank():
     signbank_train = list(filter(lambda datum: (len(datum['sign_writing'].numpy()) == 1) and
                                                (len(datum['sign_writing'].numpy()[0].decode('utf-8').split(' ')) == 1) and
                                                (len(datum['terms'].numpy()) > 1) and
-                                               (len(datum['terms'].numpy()[1].split()) == 1) and
-                                               (datum['assumed_spoken_language_code'].numpy().decode('utf-8') == 'en'),
+                                               (len(datum['terms'].numpy()[1].split()) == 1),
                                  tqdm(signbank['train'])))
     print(f'num of data: {len(signbank_train)}')
 
