@@ -2,11 +2,14 @@ import os
 import shutil
 import zipfile
 import random
-from torch import device
+
+from torch.nn import TripletMarginLoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import CLIPProcessor, CLIPModel, TrainingArguments, Trainer, AdamW
+from transformers import CLIPProcessor, CLIPModel, CLIPTokenizer
+from torch.optim import AdamW
 import torch
+from transformers.models.clip.modeling_clip import CLIPOutput
 
 from clip_sw_dataset import ClipSWDataset
 
@@ -26,7 +29,7 @@ def split_into_train_and_test():
             zip_ref.extractall(images_path)
 
         # Set the percentage of files you want in each folder
-        train_percent = 90
+        train_percent = 5
 
         # Get a list of all the files in the folder
         all_files = os.listdir(images_path)
@@ -53,11 +56,10 @@ def split_into_train_and_test():
                 shutil.copy2(os.path.join(images_path, file_name), test_path)
             os.remove(os.path.join(images_path, file_name))
 
-
-def preprocessing(batch_size=32):
+def preprocessing(batch_size=32,processor=None,tokenizer=None):
     split_into_train_and_test()
-    train_dataset = ClipSWDataset("images\\train")
-    test_dataset = ClipSWDataset("images\\test")
+    train_dataset = ClipSWDataset("images\\train",processor,tokenizer=tokenizer)
+    test_dataset = ClipSWDataset("images\\test",processor,tokenizer=tokenizer)
 
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=batch_size,
@@ -71,78 +73,38 @@ def preprocessing(batch_size=32):
     return train_loader, test_loader
 
 
-def train(model, clip_processor, optimizer, dataloader):
+def train(model: CLIPModel, clip_processor: CLIPProcessor, optimizer, dataloader,loss_fn):
     model.train()
     total_loss = 0
     for images, labels in tqdm(dataloader):
-        images = [clip_processor(images=image, return_tensors='pt').to(device) for image in images]
-        labels = clip_processor(labels, return_tensors='pt', padding=True).to(device)
-        outputs: CLIPModel = model.encode_image_text(images, labels)
-        loss = 1 - torch.sum(outputs) / outputs.shape[0]  # maximize similarity
+        outputs:CLIPOutput = model(pixel_values=images,input_ids= labels)
+
+        labels = torch.arange(outputs.logits_per_image.shape[0])
+        image_loss = loss_fn(outputs.logits_per_image, labels)
+        text_loss = loss_fn(outputs.logits_per_text, labels)
+        loss = (image_loss + text_loss) / 2
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        print(loss.item())
         total_loss += loss.item()
     return total_loss / len(dataloader)
 
 
-class ClipSWDataCollator:
-    def __init__(self, processor):
-        self.processor = processor
-
-    def __call__(self, batch):
-        # Extract the images and labels from the batch
-        images, labels = zip(*batch)
-
-        # Convert the images to tensors and preprocess them
-        images = [torch.tensor(img) for img in images]
-        inputs = self.processor(images=images, text=list(labels), return_tensors='pt', padding=True)
-
-        # Add pixel_values to the inputs dictionary
-        inputs['pixel_values'] = torch.stack(images)
-
-        return inputs
-
 if __name__ == '__main__':
-    model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32')
-    processor = CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')
-    batch_size = 32
+    model_name = 'openai/clip-vit-base-patch32'
+    model = CLIPModel.from_pretrained(model_name)
+    processor = CLIPProcessor.from_pretrained(model_name)
+    tokenizer = CLIPTokenizer.from_pretrained(model_name)
+    batch_size = 128
     num_epochs = 10
-    train_loader, test_loader = preprocessing(batch_size=batch_size)
+    train_loader, test_loader = preprocessing(batch_size=batch_size,processor=processor,tokenizer=tokenizer)
     optimizer = AdamW(model.parameters(), lr=1e-5)
 
-    # for images, labels in tqdm(train_loader):
-    #     images = [processor(images=image, return_tensors='pt').to(device) for image in images]
-    #     labels = processor(labels, return_tensors='pt', padding=True).to(device)
-    #
-    train_dataset = ClipSWDataset("images\\train")
-
-    # # Define the fine-tuning parameters
-    training_args = TrainingArguments(
-        output_dir='./results',
-        num_train_epochs=10,
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
-        warmup_steps=500,
-        weight_decay=0.01,
-        logging_dir='./logs',
-        logging_steps=100,
-        evaluation_strategy='epoch',
-    )
-
-    # Define the trainer and fine-tune the model
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        data_collator=ClipSWDataCollator(processor),
-    )
-    trainer.train()
-
-    # # Train the model
-    # for epoch in range(10):
-    #     loss = train(model=model, clip_processor=processor, optimizer=optimizer, dataloader=train_loader)
-    #     print(f'Epoch {epoch}: loss={loss:.4f}')
+    # Train the model
+    for epoch in range(10):
+        loss = train(model=model, clip_processor=processor, optimizer=optimizer, dataloader=train_loader,loss_fn=triplet_loss)
+        print(f'Epoch {epoch}: loss={loss:.4f}')
 
     # Save the fine-tuned model
     torch.save(model.state_dict(), 'fine-tuned-clip-model.pth')
