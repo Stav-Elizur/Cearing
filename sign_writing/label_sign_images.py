@@ -10,61 +10,60 @@ from tqdm import tqdm
 
 
 def generate_labeling(image_dir):
+    # Load the CLIP model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
 
-    sign_images_json = []
-    for image_file in tqdm(os.listdir(image_dir)):
-        image_processed = preprocess(Image.open(os.path.join(image_dir, image_file))).unsqueeze(0).to(device)
+    image_info = []
+    with open('images_info.jsonl') as f:
+        image_info = [json.loads(s) for s in list(f)]
+    with open('image_encodings.jsonl', 'w') as encoding_file:
+        for image_file in tqdm(sorted(os.listdir(image_dir), key=lambda d: int(d.split('.')[0]))):
+            # Load the image
+            image = Image.open(os.path.join(image_dir, image_file))
 
-        with torch.no_grad():
-            image_features = model.encode_image(image_processed)
-            sign_images_json.append({"id": image_file, "label": image_features.tolist()})
-    with open('image_encodings.json', 'w') as f:
-        json.dump(json.dumps(sign_images_json), f)
+            # Preprocess the image
+            image = preprocess(image).unsqueeze(0).to(device)
+            index = int(image_file.split('.')[0])
+
+            if len(image_info[index]['terms']) > 1:
+
+                # Load the text prompt
+                text = image_info[index]['terms'][1]
+
+                if len(text) < 77:
+                    # Encode the text prompt
+                    text = clip.tokenize(text).to(device)
+
+                    # Perform the similarity check
+                    with torch.no_grad():
+                        image_features = model.encode_image(image)
+                        text_features = model.encode_text(text)
+                        encoded_vector = torch.cat((image_features, text_features), dim=-1)
+                        json_string = json.dumps({"id": image_file, "label": encoded_vector.tolist()})
+                        encoding_file.write(json_string + '\n')
 
 
-def diff_images(image_dir):
-    with open(image_dir) as f:
-        data = json.loads(json.load(f))
-        a = np.array(data[0]['label']).flatten()
-        print(data[0]['id'])
-        print(data[1]['id'])
-        print(data[2]['id'])
+def check_cosin(filepath):
+    with open("image_encodings.jsonl") as f:
+        data = list(f)
+        data = [json.loads(s) for s in data]
 
-        b = np.array(data[1]['label']).flatten()
-        c = np.array(data[2]['label']).flatten()
-        d = np.array(data[3]['label']).flatten()
-        diff(a, b)
-        diff(a, c, True)
-        diff(b, c)
-        diff(a, d)
-        diff(b, d)
-        diff(c, d)
+    image_features = [d['label'] for d in data if d['id'] == filepath]
 
-
-def check_cosin(images_dir, filepath):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, preprocess = clip.load("ViT-B/32", device=device)
-
-    image_processed = preprocess(Image.open(os.path.join(images_dir, filepath))).unsqueeze(0).to(device)
-
-    with torch.no_grad():
-        image_features = model.encode_image(image_processed).tolist()
-
-    with open("image_encodings.json") as f:
-        data = json.loads(json.load(f))
-    max_image_diff = 0
-    max_label = None
+    print(f"Diff with image: {filepath}")
+    print("---------------------")
+    differences = []
     # Todo: array then sort by diff {id: '*.png',diff:cos_diff}
     for dt in data:
         vec = np.array(dt['label']).flatten()
         img = np.array(image_features).flatten()
-        cos_diff = diff(vec,img)
-        if max_image_diff < cos_diff:
-            max_image_diff = cos_diff
-            max_label = dt
-    print("Image id: ", max_label['id'], " Cos_Diff: ", max_image_diff)
+        cos_diff = diff(vec, img)
+
+        differences.append((dt['id'], cos_diff))
+
+    for (image, diff_images) in sorted(differences, key=lambda diff_images: diff_images[1], reverse=True):
+        print(f"Image id: {image} Cos_Diff: {diff_images}")
 
 
 def diff(a, b, similar=False):
@@ -83,13 +82,20 @@ def diff(a, b, similar=False):
     return cosine_similarity
 
 
-if __name__ == "__main__":
-    # if not os.path.exists('images'):
-    #     os.makedirs('images')
-    #
-    # with zipfile.ZipFile('images.zip', 'r') as zip_ref:
-    #     zip_ref.extractall('images')
+if __name__ == '__main__':
+    IMAGES_INFO_ZIP_NAME = "images_info.zip"
+    IMAGES_ZIP_NAME = "images.zip"
 
-    # generate_labeling("images")
+    if not os.path.exists('images'):
+        os.makedirs('images')
+
+        with zipfile.ZipFile(IMAGES_ZIP_NAME, 'r') as zip_ref:
+            zip_ref.extractall('images')
+
+    if not os.path.isfile('images_info.jsonl'):
+        with zipfile.ZipFile(IMAGES_INFO_ZIP_NAME, 'r') as zip_ref:
+            zip_ref.extractall('')
+
+    generate_labeling("images")
     # shutil.rmtree('images')
-    check_cosin(images_dir="images",filepath="0.png")
+    # check_cosin(filepath="0.png")

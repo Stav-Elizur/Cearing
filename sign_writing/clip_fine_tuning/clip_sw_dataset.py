@@ -1,46 +1,33 @@
 import os
 import zipfile
-
 import torch.utils.data as data
 import json
 from PIL import Image
 import torchvision.transforms as transforms
-
 from tqdm import tqdm
-
 import torch.nn.functional as F
 
+IMAGES_INFO_ZIP_NAME = "images_info.zip"
+IMAGES_ZIP_NAME = "images.zip"
 
 class ClipSWDataset(data.Dataset):
-    def __init__(self, dir_path, processor, tokenizer):
+    def __init__(self, dir_path):
         self.dir_path = dir_path
         self.image_info = []
-        self.processor = processor
-        self.tokenizer = tokenizer
 
         if not os.path.isfile('images_info.jsonl'):
-            with zipfile.ZipFile('images_info.zip', 'r') as zip_ref:
+            with zipfile.ZipFile(IMAGES_INFO_ZIP_NAME, 'r') as zip_ref:
                 zip_ref.extractall('')
 
         with open('images_info.jsonl') as f:
             self.image_info = list(f)
             self.image_info = [json.loads(s) for s in self.image_info]
 
-        self.image_info = list(
-            filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png"))
-                                      and len(image_info['terms']) > 1
-                                      and len(image_info['terms'][1].split()) == 1
-                                      and image_info['assumed_spoken_language_code'] == 'en',
-                   self.image_info))
-
-        texts = [self.processor(text=img['terms'][1], return_tensors='pt')['input_ids'][0]
-                 for img in self.image_info]
-        self.padded_tensors = []
-
-        max_len = max([t.shape[0] for t in texts])
-        for t in tqdm(texts):
-            padded_tensor = F.pad(t, (0, max_len - t.shape[0]), mode='constant', value=0)
-            self.padded_tensors.append(padded_tensor)
+        self.image_info = list(filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png")) and
+                                                         len(image_info['terms']) > 1 and
+                                                         len(image_info['terms'][1].split()) == 1 and
+                                                         image_info['assumed_spoken_language_code'] == 'en',
+                                      self.image_info))
 
     def __len__(self):
         return len(self.image_info)
@@ -54,8 +41,6 @@ class ClipSWDataset(data.Dataset):
 
         curr_img = Image.open(os.path.join(self.dir_path, f"{data_dict['uid']}.png"))
         image_tensor = preprocess_transforms(curr_img)
+        text = data_dict["terms"][1]
 
-        image_tensor = self.processor(images=image_tensor, return_tensors='pt')['pixel_values'][0]
-        label_tensor = self.padded_tensors[index]
-
-        return image_tensor, label_tensor
+        return image_tensor, text
