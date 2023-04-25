@@ -13,3 +13,7 @@
 *sign_writing/photos_signbank_results/
 *sign_writing/fixed_signsuisse.jsonl
 *dataset/dataset_cached/
+
+datasets/output
+datasets/photos_signbank_results
+datasets/sign_to_png

@@ -1,8 +1,12 @@
+import glob
 import os
+import uuid
 import zipfile
 import json
 import subprocess
 from typing import List
+
+import boto3
 import requests
 from tqdm import tqdm
 
@@ -71,11 +75,47 @@ def generate_images_from_sw():
             num_of_files += len(transcriptions.split(' '))
             target_file.write('\n')
 
+
+
+ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+
+BUCKET_NAME = 'signwriting-images'
+
+
+def upload_image(client, img_path: str):
+    from pathlib import Path
+
+    img_name = Path(img_path).name
+    object_key = f'signlanguage/{img_name}'
+
+    with open(img_path, 'rb') as f:
+        client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=object_key,
+            Body=f
+        )
+
+        return client.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={
+                'Bucket': BUCKET_NAME,
+                'Key': object_key,
+            }
+        )
+
+
 def generate_images_from_sign_bank():
     import sign_language_datasets.datasets
     import tensorflow_datasets as tfds
     import itertools
     import shutil
+
+    client = boto3.client(
+        's3',
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY
+    )
 
     if os.path.exists('photos_signbank_results'):
         shutil.rmtree('photos_signbank_results')
@@ -83,28 +123,38 @@ def generate_images_from_sign_bank():
     os.mkdir('photos_signbank_results')
 
     signbank = tfds.load(name='sign_bank')
-    signbank_train = list(filter(lambda datum: (len(datum['sign_writing'].numpy()) == 1) and
-                                               (len(datum['sign_writing'].numpy()[0].decode('utf-8').split(' ')) == 1),
-                                 tqdm(signbank['train'])))
-    print(f'num of data: {len(signbank_train)}')
+    signbank_train = signbank['train']
 
     num_of_files = 0
-    for uid, datum in enumerate(tqdm(itertools.islice(signbank_train, 0, 10000))):
-        sign_writing: List[bytes] = datum['sign_writing'].numpy()
+    results = []
 
-        subprocess.call(f'node fsw/fsw-sign-png {sign_writing[0].decode("utf-8")} ../../photos_signbank_results/{uid}.png',
+    for datum in itertools.islice(signbank_train, 0, 1000):
+        sign_writing: List[bytes] = datum['sign_writing'].numpy()[0].decode('utf-8')
+        filename = uuid.uuid4().hex
+
+        subprocess.call(f'node fsw/fsw-sign-png {sign_writing} ../../photos_signbank_results/{filename}.png',
                         cwd='sign_to_png/font_db', shell=True)
+
+        img_url = upload_image(client=client, img_path=os.path.abspath(f'./photos_signbank_results/{filename}.png'))
 
         files = os.listdir('photos_signbank_results/')
         if len(files) != (num_of_files + 1):
             print("ERROR: Don't generate a file")
-            exit(1)
+            continue
 
-        num_of_files += 1
+        result = datum
+        result['img_url'] = img_url
+        results.append(result)
+
+        files = glob.glob('./photos_signbank_results/*')
+        for f in files:
+            os.remove(f)
+
+    print(results)
 
 
 if __name__ == '__main__':
     fsw_init_package()
     generate_images_from_sign_bank()
     # generate_images_from_sw()
-    clean_fsw_package()
+    # clean_fsw_package()
