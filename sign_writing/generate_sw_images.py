@@ -103,8 +103,45 @@ def generate_images_from_sign_bank():
         num_of_files += 1
 
 
+def create_semantic_images_html(word1,word2):
+    import base64
+    encoded_word1 = api_call_spoken2sign({
+                    "country_code": 'us',
+                    "language_code": 'us',
+                    "text": word1,
+                    "translation_type": "sent"
+                })
+    encoded_word2 = api_call_spoken2sign({
+        "country_code": 'us',
+        "language_code": 'us',
+        "text": word2,
+        "translation_type": "sent"
+    })
+
+    subprocess.call(f'node fsw/fsw-sign-png {encoded_word1} ../../photos_signbank_results/{word1}.png',
+                    cwd='sign_to_png/font_db', shell=True)
+
+    subprocess.call(f'node fsw/fsw-sign-png {encoded_word2} ../../photos_signbank_results/{word2}.png',
+                    cwd='sign_to_png/font_db', shell=True)
+
+    with open('output.html', 'w') as f:
+        f.write('<html>\n<body>\n')
+
+        with open(f'photos_signbank_results/{word1}.png', 'rb') as svg_file:
+            svg_content = svg_file.read()
+            encoded_svg = base64.b64encode(svg_content).decode('utf-8')
+            f.write(f'<img src="photos_signbank_results/{word1}.png">\n')
+
+        with open(f'photos_signbank_results/{word2}.png', 'rb') as svg_file:
+            svg_content = svg_file.read()
+            encoded_svg = base64.b64encode(svg_content).decode('utf-8')
+            f.write(f'<img src="photos_signbank_results/{word2}.png">\n')
+        f.write('</body>\n</html>\n')
+
+
 if __name__ == '__main__':
     fsw_init_package()
-    generate_images_from_sign_bank()
+    create_semantic_images_html('delicious','Tasty')
+    # generate_images_from_sign_bank()
     # generate_images_from_sw()
-    clean_fsw_package()
+    # clean_fsw_package()

@@ -20,7 +20,7 @@ class ClipSWDataset(data.Dataset):
                 zip_ref.extractall('')
 
         with open('images_info.jsonl') as f:
-            self.image_info = list(f)
+            self.image_info = list(json.loads(f))
             self.image_info = [json.loads(s) for s in self.image_info]
 
         self.image_info = list(filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png")) and

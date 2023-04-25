@@ -6,7 +6,7 @@ import random
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import CLIPProcessor, CLIPModel, AdamW
+from transformers import CLIPProcessor, CLIPModel, AdamW, CLIPTokenizer
 import torch
 
 from clip_sw_dataset import ClipSWDataset, IMAGES_ZIP_NAME
@@ -118,11 +118,12 @@ def train(model, dataloader, optimizer, contrastive_loss, processor, device):
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model_name = 'openai/clip-vit-base-patch32'
+    model = CLIPModel.from_pretrained(model_name).to(device)
 
-    model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32').to(device)
-    processor = CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')
-
-    batch_size = 32
+    processor = CLIPProcessor.from_pretrained(model_name)
+    tokenizer = CLIPTokenizer.from_pretrained(model_name)
+    batch_size = 128
     num_epochs = 10
 
     train_loader, test_loader = preprocessing(batch_size=batch_size)
