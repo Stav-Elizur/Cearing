@@ -6,19 +6,19 @@ import random
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import CLIPProcessor, CLIPModel, AdamW, CLIPTokenizer
+from transformers import CLIPProcessor, CLIPModel, CLIPTokenizer
+from torch.optim.adamw import AdamW
 import torch
 
-from clip_sw_dataset import ClipSWDataset, IMAGES_ZIP_NAME
+from clip_sw_dataset import ClipSWDataset, IMAGES_ZIP_NAME, BASE_SW_PATH
 
 
-def split_into_train_and_test():
+def split_into_train_and_test(images_path):
     # user defined function to shuffle
     def shuffle_function():
         return 0.5
 
     # Set the path of the folder you want to split
-    images_path = "images"
 
     if not os.path.exists(images_path):
         os.makedirs(images_path)
@@ -56,9 +56,9 @@ def split_into_train_and_test():
 
 
 def preprocessing(batch_size=32):
-    split_into_train_and_test()
-    train_dataset = ClipSWDataset("images/train")
-    test_dataset = ClipSWDataset("images/test")
+    split_into_train_and_test(f"{BASE_SW_PATH}/images")
+    train_dataset = ClipSWDataset(f"{BASE_SW_PATH}/images/train")
+    test_dataset = ClipSWDataset(f"{BASE_SW_PATH}/images/test")
 
     print(f"Len train: {len(train_dataset)}")
     print(f"Len test: {len(test_dataset)}")
@@ -86,12 +86,11 @@ def contrastive_loss(image_rep, text_rep):
     loss = (-torch.log(sim_pos / (sim_pos + sim_neg))).mean()
     return loss
 
-
 # Define the training loop
-def train(model, dataloader, optimizer, contrastive_loss, processor, device):
+def train(model: CLIPModel, dataloader, optimizer:AdamW, contrastive_loss, processor, device):
     model.train()
     total_loss = 0.0
-    for images, texts in dataloader:
+    for images, texts in tqdm(dataloader):
         images = images.to(device)
         texts = [processor(text, return_tensors='pt').input_ids.to(device) for text in texts]
 
@@ -108,7 +107,8 @@ def train(model, dataloader, optimizer, contrastive_loss, processor, device):
         with torch.no_grad():
             text_rep = model.get_text_features(stacked_tensor)
         image_rep = model.get_image_features(images)
-        loss = contrastive_loss(image_rep, text_rep)
+
+        loss: torch.Tensor = contrastive_loss(image_rep, text_rep)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -117,15 +117,14 @@ def train(model, dataloader, optimizer, contrastive_loss, processor, device):
 
 
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
     model_name = 'openai/clip-vit-base-patch32'
     model = CLIPModel.from_pretrained(model_name).to(device)
-
     processor = CLIPProcessor.from_pretrained(model_name)
     tokenizer = CLIPTokenizer.from_pretrained(model_name)
-    batch_size = 128
+    batch_size = 64
     num_epochs = 10
-
+    
     train_loader, test_loader = preprocessing(batch_size=batch_size)
     optimizer = AdamW(model.parameters(), lr=1e-4)
 

@@ -4,23 +4,24 @@ import torch.utils.data as data
 import json
 from PIL import Image
 import torchvision.transforms as transforms
-from tqdm import tqdm
-import torch.nn.functional as F
 
-IMAGES_INFO_ZIP_NAME = "images_info.zip"
-IMAGES_ZIP_NAME = "images.zip"
+BASE_SW_PATH= f"{os.getcwd()}/sign_writing"
+BASE_ENGLISH_PATH= f"{BASE_SW_PATH}/DataSets/OnlyEnglish"
+IMAGES_INFO_ZIP_NAME = f"{BASE_ENGLISH_PATH}/images_info.zip"
+IMAGES_ZIP_NAME = f"{BASE_ENGLISH_PATH}/images.zip"
+IMAGES_INFO_PATH = f"{BASE_SW_PATH}/images_info.jsonl"
 
 class ClipSWDataset(data.Dataset):
     def __init__(self, dir_path):
         self.dir_path = dir_path
         self.image_info = []
 
-        if not os.path.isfile('images_info.jsonl'):
+        if not os.path.isfile(f'{IMAGES_INFO_PATH}'):
             with zipfile.ZipFile(IMAGES_INFO_ZIP_NAME, 'r') as zip_ref:
                 zip_ref.extractall('')
 
-        with open('images_info.jsonl') as f:
-            self.image_info = list(json.loads(f))
+        with open(f'{IMAGES_INFO_PATH}') as f:
+            self.image_info = list(f)
             self.image_info = [json.loads(s) for s in self.image_info]
 
         self.image_info = list(filter(lambda image_info: os.path.isfile(os.path.join(dir_path, f"{image_info['uid']}.png")) and
