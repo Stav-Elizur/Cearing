@@ -66,13 +66,22 @@ class SignBankWithImages(tfds.core.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager: tfds.download.DownloadManager):
         dataset_warning(self)
 
+        paginator = client.get_paginator('list_objects_v2')
+        page_iterator = paginator.paginate(Bucket=BUCKET_NAME)
+
+        def __yielder():
+            for page in page_iterator:
+                if 'Contents' in page:
+                    for obj in page['Contents']:
+                        yield obj['Key']
+
         return {
             "train": self._generate_examples(
-                samples=[key['Key'] for key in client.list_objects(Bucket=BUCKET_NAME)['Contents']]
+                samples=__yielder()
             ),
         }
 
-    def _generate_examples(self, samples: list[str]):
+    def _generate_examples(self, samples):
         for i, sample in enumerate(samples):
             obj = client.get_object(Bucket=BUCKET_NAME, Key=sample)['Body'].read().decode('utf-8')
             obj = json.loads(obj)
