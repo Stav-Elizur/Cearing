@@ -9,7 +9,7 @@ import torch
 from transformers.models.clip.modeling_clip import CLIPOutput
 
 from clip_sw_dataset import ClipSWDataset, IMAGES_ZIP_NAME, BASE_SW_PATH
-from sign_writing.clip_fine_tuning.fine_tuning_clip import split_into_train_and_test
+from sign_writing_approach.clip_fine_tuning.fine_tuning_clip import split_into_train_and_test
 class CLIPTrainer(pl.LightningModule):
     def __init__(self, model_name_or_path, learning_rate=3e-5,batch_size=64):
         super().__init__()
