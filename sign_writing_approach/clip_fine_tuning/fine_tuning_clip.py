@@ -10,7 +10,7 @@ from transformers import CLIPProcessor, CLIPModel, CLIPTokenizer
 from torch.optim.adamw import AdamW
 import torch
 
-from clip_sw_dataset import ClipSWDataset, IMAGES_ZIP_NAME, BASE_SW_PATH
+from sign_writing_approach.clip_fine_tuning.clip_sw_dataset import IMAGES_ZIP_NAME
 
 
 def split_into_train_and_test(images_path):
@@ -87,18 +87,22 @@ def contrastive_loss(image_rep, text_rep):
     return loss
 
 # Define the training loop
-def train(model: CLIPModel, dataloader, optimizer:AdamW, contrastive_loss, processor, device):
+
+
+def train(model: CLIPModel, dataloader, optimizer: AdamW, contrastive_loss, processor, device):
     model.train()
     total_loss = 0.0
     for images, texts in tqdm(dataloader):
         images = images.to(device)
-        texts = [processor(text, return_tensors='pt').input_ids.to(device) for text in texts]
+        texts = [processor(text, return_tensors='pt').input_ids.to(
+            device) for text in texts]
 
         # Pad tensors with zeros to make them the same size
         padded_tensors = []
         max_len = max([t.shape[1] for t in texts])
         for t in texts:
-            padded_tensor = F.pad(t, (0, max_len - t.shape[1]), mode='constant', value=0)
+            padded_tensor = F.pad(
+                t, (0, max_len - t.shape[1]), mode='constant', value=0)
             padded_tensors.append(padded_tensor)
 
         stacked_tensor = torch.stack(padded_tensors)
@@ -124,13 +128,14 @@ if __name__ == '__main__':
     tokenizer = CLIPTokenizer.from_pretrained(model_name)
     batch_size = 64
     num_epochs = 10
-    
+
     train_loader, test_loader = preprocessing(batch_size=batch_size)
     optimizer = AdamW(model.parameters(), lr=1e-4)
 
     # Train the model
     for epoch in tqdm(range(num_epochs)):
-        loss = train(model, train_loader, optimizer, contrastive_loss, processor, device)
+        loss = train(model, train_loader, optimizer,
+                     contrastive_loss, processor, device)
         print(f'Epoch {epoch + 1} loss: {loss:.4f}')
 
     # Save the fine-tuned model
