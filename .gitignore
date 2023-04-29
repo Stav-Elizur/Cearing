@@ -1,12 +1,13 @@
 *transcription-main/
 *datasets-master/
-*models/
+hamnosys_approach/models/
+hamnosys_approach/dataset/dataset_cached/
+hamnosys_approach/videos/
 *idea/
 *__pycache__/
 *results/
 *.z01
 *lightning_logs/
-*videos/
 *sign_writing/sign_to_png/
 *sign_writing/images/
 *sign_writing/clip_fine_tuning/images/
@@ -20,5 +21,4 @@
 *sign_writing/clip_fine_tuning/image_sw_word_encodings.jsonl
 *sign_writing/clip_fine_tuning/images_info.jsonl
 *sign_writing/images_info.jsonl
-
-*dataset/dataset_cached/
+*.jsonl

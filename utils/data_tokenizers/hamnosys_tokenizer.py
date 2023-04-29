@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 from fontTools.ttLib import TTFont
-from data_tokenizers.base_tokenizer import BaseTokenizer
+from utils.data_tokenizers.base_tokenizer import BaseTokenizer
 
 
 class HamNoSysTokenizer(BaseTokenizer):

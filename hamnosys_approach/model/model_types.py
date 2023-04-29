@@ -1,7 +1,7 @@
 from dataclasses import dataclass, astuple
-from typing import Tuple, Any
+from typing import Tuple
 
-from data_tokenizers.base_tokenizer import BaseTokenizer
+from utils.data_tokenizers.base_tokenizer import BaseTokenizer
 
 
 @dataclass

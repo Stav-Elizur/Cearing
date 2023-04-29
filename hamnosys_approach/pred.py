@@ -8,8 +8,8 @@ from pose_format.numpy.pose_body import NumPyPoseBody
 from pose_format.pose_header import PoseHeader
 from pose_format.pose_visualizer import PoseVisualizer
 
-from data_tokenizers.hamnosys_tokenizer import HamNoSysTokenizer
-from dataset.data import load_dataset
+from utils.data_tokenizers import HamNoSysTokenizer
+from hamnosys_approach.dataset.data import load_dataset
 from model.Iterative_decoder import IterativeGuidedPoseGenerationModel
 from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel

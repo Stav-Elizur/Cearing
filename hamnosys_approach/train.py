@@ -1,15 +1,14 @@
 import os
 
-import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
 
-from dataset.data import load_dataset
+from hamnosys_approach.dataset.data import load_dataset
 from model.Iterative_decoder import IterativeGuidedPoseGenerationModel
 from model.model_types import ConfigPoseEncoder, ConfigTextEncoder
 from model.pose_encoder import PoseEncoderModel
 from model.text_encoder import TextEncoderModel
-from data_tokenizers.hamnosys_tokenizer import HamNoSysTokenizer
+from utils.data_tokenizers import HamNoSysTokenizer
 from utils.train_utils import zero_pad_collator
 import pytorch_lightning as pl
 
