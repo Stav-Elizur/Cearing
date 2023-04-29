@@ -22,6 +22,7 @@ the ISWA 2010 Font Reference Library and the RAND Keyboard for SignWriting.
 ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
 SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 BUCKET_NAME = 'signwriting-images'
+PREFIX = 'dataset-outputs'
 
 client = boto3.client(
     's3',
@@ -67,7 +68,7 @@ class SignBankWithImages(tfds.core.GeneratorBasedBuilder):
         dataset_warning(self)
 
         paginator = client.get_paginator('list_objects_v2')
-        page_iterator = paginator.paginate(Bucket=BUCKET_NAME)
+        page_iterator = paginator.paginate(Bucket=BUCKET_NAME, Prefix=PREFIX)
 
         def __yielder():
             for page in page_iterator:
