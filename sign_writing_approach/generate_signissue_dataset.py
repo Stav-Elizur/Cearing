@@ -33,7 +33,7 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
         json_list = list(json_file)
 
     with open(r'resources/fixed_signsuisse.jsonl','w') as target_file:
-        for json_str in tqdm(json_list[0:15000]):
+        for json_str in tqdm(json_list[15000:30000]):
             result = json.loads(json_str)
 
             captions: List[dict] = result['captions']
