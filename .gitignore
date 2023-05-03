@@ -21,5 +21,4 @@ hamnosys_approach/videos/
 *sign_writing_approach/clip_fine_tuning/image_sw_word_encodings.jsonl
 *sign_writing_approach/clip_fine_tuning/images_info.jsonl
 *sign_writing_approach/images_info.jsonl
-*.jsonl
 *.wav
