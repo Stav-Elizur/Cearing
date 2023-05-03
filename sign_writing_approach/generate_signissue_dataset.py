@@ -32,7 +32,6 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
     with open(r'resources/signsuisse_source.jsonl', 'r') as json_file:
         json_list = list(json_file)
 
-    for_break = False
     with open(r'resources/fixed_signsuisse.jsonl','w') as target_file:
         for json_str in tqdm(json_list):
             result = json.loads(json_str)
@@ -41,7 +40,6 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
             uid = result['doc']['uid']
 
             if with_sgnw and len(captions) != 2:
-                for_break = True
                 transcription = captions[0]['transcription']
                 country_code = captions[0]['language']
                 language_code = result['doc']['meta']['language']
@@ -62,9 +60,6 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
                                 cwd='sign_to_png/font_db', shell=True)
             json.dump(result, target_file)
             target_file.write('\n')
-
-            if for_break:
-                break
 
 
 if __name__ == '__main__':
