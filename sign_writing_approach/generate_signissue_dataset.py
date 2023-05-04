@@ -32,7 +32,7 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
     with open(r'resources/signsuisse_source.jsonl', 'r') as json_file:
         json_list = list(json_file)
 
-    i = 2
+    i = 3
     with open(r'resources/fixed_signsuisse.jsonl','w') as target_file:
         for json_str in tqdm(json_list[6070 * (i - 1): 6070 * i]):
             result = json.loads(json_str)
