@@ -20,8 +20,11 @@ def clean_fsw_package():
 
 
 def api_call_spoken2sign(payload):
+    old_text = payload['text']
+    payload['text'] = payload['text'].replace("`", "")
     url = 'https://pub.cl.uzh.ch/demo/signwriting/spoken2sign'
     response = requests.post(url, json=payload).json()
+    payload['text'] = old_text
     return response['translations'][0]
 
 
@@ -32,7 +35,7 @@ def fix_signissue_jsonl(with_sgnw: bool, with_images: bool):
     with open(r'resources/signsuisse_source.jsonl', 'r') as json_file:
         json_list = list(json_file)
 
-    i = 6
+    i = 5
     with open(r'resources/fixed_signsuisse.jsonl','w') as target_file:
         for json_str in tqdm(json_list[6070 * (i - 1): 6070 * i]):
             result = json.loads(json_str)
