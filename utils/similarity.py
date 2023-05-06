@@ -20,19 +20,15 @@ def diff(a, b, similar=False):
     return cosine_similarity
 
 
-def check_cosin(traget_vector: Tensor, file_encoding_name) -> list:
-    with open(file_encoding_name) as f:
-        data = list(f)
-        data = [json.loads(s) for i, s in enumerate(data)]
-
+def check_cosin(traget_vector: Tensor, data) -> list:
     differences = []
     for dt in data:
-        vec = np.array(dt['image_encoded']).flatten()
+        # dt = { "text", "image_text_encoded", "pose_url"}
+        vec = np.array(dt['image_text_encoded']).flatten()
         img = np.array(traget_vector).flatten()
         cos_diff = diff(vec, img)
-        differences.append((dt['id'], dt['text'], cos_diff))
+        differences.append((dt['text'], dt['pose_url'], cos_diff))
 
-    # for (image, text, diff_images) in sorted(differences, key=lambda diff_images: diff_images[2], reverse=True):
-    #     print(f"Image id: {image} text:{text} Cos_Diff: {diff_images}")
+    differences = sorted(differences, key=lambda diff_images: diff_images[2])
 
     return differences
