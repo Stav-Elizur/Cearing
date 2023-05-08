@@ -149,7 +149,7 @@ if __name__ == '__main__':
         shutil.rmtree(svg_folder)
     os.mkdir(svg_folder)
 
-    i = 6
+    i = 7
     for datum in tqdm(itertools.islice(sign2mint, 277 * (i-1), 277 * i)):
         print('Generate swu')
         tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
