@@ -150,7 +150,7 @@ if __name__ == '__main__':
     os.mkdir(svg_folder)
 
     i = 1
-    for datum in tqdm(itertools.islice(sign2mint, 0, 1)):
+    for datum in tqdm(itertools.islice(sign2mint, 277 * (i-1), 277 * i)):
         print('Generate swu')
         tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
         tr = decode_surrogates(tr)
