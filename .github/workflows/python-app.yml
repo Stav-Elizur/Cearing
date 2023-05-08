@@ -27,7 +27,7 @@ jobs:
         with:
           path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: ${{ runner.os }}-dependencies-
+          restore-keys: ''
 
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
@@ -48,35 +48,36 @@ jobs:
         with:
           path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: ${{ runner.os }}-dependencies-
 
-      - name: Generate Sign2Mint
-        run: |
-          sudo apt install ffmpeg
-          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
-          cd Poses
-          python -m generate_sign2mint
-
-      - name: Upload Artifact Videos
-        uses: actions/upload-artifact@v2
-        with:
-          name: Videos
-          path: Poses/Videos
-          retention-days: 5
-
-      - name: Upload Artifact Poses
-        uses: actions/upload-artifact@v2
-        with:
-          name: Poses
-          path: Poses/Poses
-          retention-days: 5
-
-      - name: Upload Artifact Svgs
-        uses: actions/upload-artifact@v2
-        with:
-          name: Svgs
-          path: Poses/Svgs
-          retention-days: 5
-
+#      - name: Generate Sign2Mint
+#        run: |
+#          sudo apt install ffmpeg
+#          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
+#          cd Poses
+#          python -m generate_sign2mint
+#
+#      - name: Upload Artifact Videos
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Videos
+#          path: Poses/Videos
+#          retention-days: 5
+#
+#      - name: Upload Artifact Poses
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Poses
+#          path: Poses/Poses
+#          retention-days: 5
+#
+#      - name: Upload Artifact Svgs
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Svgs
+#          path: Poses/Svgs
+#          retention-days: 5
+#
 #      - name: Generate Photos
 #        run: |
 #          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
