@@ -1,3 +1,4 @@
+import json
 import subprocess
 import zipfile
 import cv2
@@ -87,17 +88,17 @@ def pose_hide_legs(pose: Pose):
         raise ValueError("Unknown pose header schema for hiding legs")
 
 
-def save_video(name: str):
+def save_video(pose_name: str, video_name: str):
     DEFAULT_COMPONENTS = ["POSE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS", "FACE_LANDMARKS"]
 
     print('Loading input pose ...')
-    with open(f'{name}.pose', 'rb') as pose_file:
+    with open(f'{pose_name}.pose', 'rb') as pose_file:
         pose = Pose.read(pose_file.read())
         pose = pose.get_components(DEFAULT_COMPONENTS)
         pose_hide_legs(pose)
 
         print('Generating videos ...')
-        visualize_pose(pose, f'{name}.mp4')
+        visualize_pose(pose, f'{video_name}.mp4')
 
 
 def decode_surrogates(string):
@@ -130,8 +131,8 @@ if __name__ == '__main__':
     import itertools
 
     fsw_init_package()
-    config = SignDatasetConfig(name="only-annotations", version="1.0.0", include_video=False)
-    sign2mint = tfds.load(name='sign2_mint', builder_kwargs={"config": config})
+    with open(r'../sign_writing_approach/resources/sign2mint.jsonl', 'r') as f:
+        sign2mint = [json.loads(s) for s in list(f)]
     pose_folder = 'Poses'
     video_folder = 'Videos'
     svg_folder = 'Svgs'
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     os.mkdir(svg_folder)
 
     i = 1
-    for datum in tqdm(itertools.islice(sign2mint["train"], 0, 1)):
+    for datum in tqdm(itertools.islice(sign2mint, 0, 1)):
         print('Generate swu')
         tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
         tr = decode_surrogates(tr)
@@ -161,11 +162,11 @@ if __name__ == '__main__':
                         cwd='sign_to_png/font_db', shell=True)
 
         print('Generate pose')
-        video_name = datum['video'].numpy().decode('utf-8').split('.mp4')[0]
-        pose_name = video_name.split('/')[-1]
+        video_name = datum['doc']['url'].split('.mp4')[0]
+        pose_name = uid
         save_pose(video_name, f'Poses/{pose_name}')
 
         print('Generate video')
-        pose_file_path = f'{pose_folder}/{pose_name.split(".pose")[0]}'
-        video_file_path = f'{video_folder}/{pose_name.split(".pose")[0]}'
+        pose_file_path = f'{pose_folder}/{pose_name}'
+        video_file_path = f'{video_folder}/{pose_name}'
         save_video(pose_file_path, video_file_path)
