@@ -55,7 +55,7 @@ jobs:
           sudo apt install ffmpeg
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
           cd Poses
-          python -m generate_sign2mint
+          python -m generate_signsuisse
 
       - name: Upload Artifact Videos
         uses: actions/upload-artifact@v2
