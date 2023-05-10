@@ -130,9 +130,12 @@ def fsw_init_package():
 
 #607,60
 if __name__ == '__main__':
-    print('Testing env file working')
-    batch_num = os.getenv('BATCH_NUM')
-    print(batch_num)
+    batch_num = int(os.getenv('BATCH_NUM'))
+
+    print(batch_num*50)
+    # batch_num: int = int(str(os.getenv('BATCH_NUM')))
+    # print("Batch Number: ",batch_num)
+    # print(batch_num)
     # import itertools
     #
     # fsw_init_package()
@@ -154,7 +157,7 @@ if __name__ == '__main__':
     #     shutil.rmtree(svg_folder)
     # os.mkdir(svg_folder)
     #
-    # i = 1 #277 * (i-1), 277 * i)
+    # i = batch_num #277 * (i-1), 277 * i)
     # for datum in tqdm(itertools.islice(signsuisse, 0, 1)):
     #     print('Generate fsw')
     #     tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
