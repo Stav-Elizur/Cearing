@@ -130,6 +130,7 @@ def fsw_init_package():
 
 #607,60
 if __name__ == '__main__':
+    print('Testing env file working')
     batch_num = os.getenv('BATCH_NUM')
     print(batch_num)
     # import itertools
