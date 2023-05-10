@@ -131,48 +131,44 @@ def fsw_init_package():
 #607,60
 if __name__ == '__main__':
     batch_num = int(os.getenv('BATCH_NUM'))
+    print("Batch Number: ",batch_num)
+    import itertools
 
-    print(batch_num*50)
-    # batch_num: int = int(str(os.getenv('BATCH_NUM')))
-    # print("Batch Number: ",batch_num)
-    # print(batch_num)
-    # import itertools
-    #
-    # fsw_init_package()
-    # with open(r'../sign_writing_approach/resources/fixed_signsuisse.jsonl', 'r') as f:
-    #     signsuisse = [json.loads(s) for s in list(f)]
-    # pose_folder = 'Poses'
-    # video_folder = 'Videos'
-    # svg_folder = 'Svgs'
-    #
-    # if os.path.exists(pose_folder):
-    #     shutil.rmtree(pose_folder)
-    # os.mkdir(pose_folder)
-    #
-    # if os.path.exists(video_folder):
-    #     shutil.rmtree(video_folder)
-    # os.mkdir(video_folder)
-    #
-    # if os.path.exists(svg_folder):
-    #     shutil.rmtree(svg_folder)
-    # os.mkdir(svg_folder)
-    #
-    # i = batch_num #277 * (i-1), 277 * i)
-    # for datum in tqdm(itertools.islice(signsuisse, 0, 1)):
-    #     print('Generate fsw')
-    #     tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
-    #
-    #     print('Generate svg')
-    #     uid = datum['doc']['uid']
-    #     subprocess.call(f'node fsw/fsw-sign-svg {tr} ../../{svg_folder}/{uid}.svg',
-    #                     cwd='sign_to_png/font_db', shell=True)
-    #
-    #     print('Generate pose')
-    #     video_name = datum['doc']['url'].split('.mp4')[0]
-    #     pose_name = uid
-    #     save_pose(video_name, f'Poses/{pose_name}')
-    #
-    #     print('Generate video')
-    #     pose_file_path = f'{pose_folder}/{pose_name}'
-    #     video_file_path = f'{video_folder}/{pose_name}'
-    #     save_video(pose_file_path, video_file_path)
+    fsw_init_package()
+    with open(r'../sign_writing_approach/resources/fixed_signsuisse.jsonl', 'r') as f:
+        signsuisse = [json.loads(s) for s in list(f)]
+    pose_folder = 'Poses'
+    video_folder = 'Videos'
+    svg_folder = 'Svgs'
+
+    if os.path.exists(pose_folder):
+        shutil.rmtree(pose_folder)
+    os.mkdir(pose_folder)
+
+    if os.path.exists(video_folder):
+        shutil.rmtree(video_folder)
+    os.mkdir(video_folder)
+
+    if os.path.exists(svg_folder):
+        shutil.rmtree(svg_folder)
+    os.mkdir(svg_folder)
+
+    i = batch_num #277 * (i-1), 277 * i)
+    for datum in tqdm(itertools.islice(signsuisse, 607 * (i-1), 607*i)):
+        print('Generate fsw')
+        tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
+
+        print('Generate svg')
+        uid = datum['doc']['uid']
+        subprocess.call(f'node fsw/fsw-sign-svg {tr} ../../{svg_folder}/{uid}.svg',
+                        cwd='sign_to_png/font_db', shell=True)
+
+        print('Generate pose')
+        video_name = datum['doc']['url'].split('.mp4')[0]
+        pose_name = uid
+        save_pose(video_name, f'Poses/{pose_name}')
+
+        print('Generate video')
+        pose_file_path = f'{pose_folder}/{pose_name}'
+        video_file_path = f'{video_folder}/{pose_name}'
+        save_video(pose_file_path, video_file_path)
