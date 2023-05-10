@@ -50,7 +50,7 @@ jobs:
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: ${{ runner.os }}-dependencies-
 
-      - name: Generate Sign2Mint
+      - name: Generate SignSuisse
         run: |
           sudo apt install ffmpeg
           export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
