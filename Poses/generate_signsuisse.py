@@ -128,7 +128,7 @@ def fsw_init_package():
 
     subprocess.call('npm install', cwd='sign_to_png/font_db', shell=True)
 
-#607,60
+#60, 607
 if __name__ == '__main__':
     batch_num = int(os.getenv('BATCH_NUM'))
     print("Batch Number: ",batch_num)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     os.mkdir(svg_folder)
 
     i = batch_num #277 * (i-1), 277 * i)
-    for datum in tqdm(itertools.islice(signsuisse, 607 * (i-1), 607*i)):
+    for datum in tqdm(itertools.islice(signsuisse, 60 * (i-1), 60*i)):
         print('Generate fsw')
         tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
 
