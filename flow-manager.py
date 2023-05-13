@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import torch
 from sign_writing_approach.clip_fine_tuning.clip_fine_tuning_lighting import CLIPTrainer
 from sign_writing_approach.generate_sw_images import api_call_spoken2sign
+from sign_writing_approach.model.sign_writing_model import SignWritingModel
 from spoken_to_text.spoken_to_text import AudioRecorder
 from transformers import CLIPModel
 import subprocess
@@ -15,20 +16,6 @@ from utils.similarity import check_cosin
 class ImageTextPair:
     image: Image
     text: str
-
-
-class SignWritingModel:
-    def __init__(self, checkpoint_path: str):
-        self.trainer: CLIPTrainer = CLIPTrainer.load_from_checkpoint(
-            checkpoint_path)
-        self.similarity_model: CLIPModel = self.trainer.model
-        self.processor = self.trainer.processor
-
-    def sign_writing_signature(self, text: str, image) -> torch.Tensor:
-        encoded_text = self.similarity_model.encode_text(text=text)
-        encoded_image = self.similarity_model.encode_image(image=image)
-        encoded_vector = torch.cat((encoded_image, encoded_text), dim=-1)
-        return encoded_vector
 
 
 class FlowManager:
@@ -46,7 +33,7 @@ class FlowManager:
                 "translation_type": "sent"
             })
             output = subprocess.check_output(
-                f'node fsw/fsw-sign-png {encoded_sw}', cwd='sign_writing_approach/sign_to_png/font_db', shell=True)
+                f'node fsw/fsw-sign-svg {encoded_sw}', cwd='sign_writing_approach/sign_to_svg/font_db', shell=True)
             output_str = output.decode('utf-8')
             png_bytes = cairosvg.svg2png(output_str)
             curr_img = Image.open(io.BytesIO(png_bytes))
@@ -64,12 +51,12 @@ class FlowManager:
         words_sentence: list[str] = spoken_text.split(' ')
 
         is_exist = False
-        if is_exist is False:
+        if not is_exist:
             image_text_pairs: list[ImageTextPair] = self.generate_image_text_pairs(
                 spoken_text=words_sentence)
             for image, text in image_text_pairs:
                 encoded_vector: torch.Tensor = self.model.sign_writing_signature(
-                    text=text, images=image)
+                    text=text, image=image)
                 similar_tensor_images = check_cosin(traget_vector=encoded_vector,
                                                     file_encoding_name=encoded_vectors_path)
                 pose = self.get_similar_pose(
