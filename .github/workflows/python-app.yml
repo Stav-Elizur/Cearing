@@ -12,72 +12,88 @@ env:
   DATASET_CACHE_DIR: dataset_cached
 
 jobs:
-  install_dependencies:
+  nbconvert:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        id: cache-dependencies
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: ''
-
       - name: Install dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
-          pip install pose-format
-          pip install mediapipe
-          pip install git+https://github.com/sign-language-processing/datasets.git
-          pip install vidgear
-          pip install dotenv
-          pip install protobuf==3.19.6
-          touch /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/__init__.py
-          touch /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          cp builder.py /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        with:
-          path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: ${{ runner.os }}-dependencies-
-
-      - name: Generate SignSuisse
+          pip install jupyter nbconvert
+      - name: Run nbconvert
         run: |
-          sudo apt install ffmpeg
-          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
-          cd Poses
-          python -m generate_signsuisse
+          jupyter nbconvert --to html Final_project.ipynb
 
-      - name: Upload Artifact Videos
-        uses: actions/upload-artifact@v2
-        with:
-          name: Videos
-          path: Poses/Videos
-          retention-days: 5
-
-      - name: Upload Artifact Poses
-        uses: actions/upload-artifact@v2
-        with:
-          name: Poses
-          path: Poses/Poses
-          retention-days: 5
-
-      - name: Upload Artifact Svgs
-        uses: actions/upload-artifact@v2
-        with:
-          name: Svgs
-          path: Poses/Svgs
-          retention-days: 5
+#  install_dependencies:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up Python 3.10
+#        uses: actions/setup-python@v3
+#        with:
+#          python-version: "3.10"
+#
+#      - name: Restore cached dependencies
+#        uses: actions/cache@v2
+#        id: cache-dependencies
+#        with:
+#          path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
+#          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: ''
+#
+#      - name: Install dependencies
+#        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+#        run: |
+#          pip install pose-format
+#          pip install mediapipe
+#          pip install git+https://github.com/sign-language-processing/datasets.git
+#          pip install vidgear
+#          pip install dotenv
+#          pip install protobuf==3.19.6
+#          touch /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/__init__.py
+#          touch /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+#          cp builder.py /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/google/protobuf/internal/builder.py
+#          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#
+#      - name: Cache dependencies
+#        uses: actions/cache@v2
+#        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+#        with:
+#          path: /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
+#          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
+#          restore-keys: ${{ runner.os }}-dependencies-
+#
+#      - name: Generate SignSuisse
+#        run: |
+#          sudo apt install ffmpeg
+#          export PYTHONPATH=$PYTHONPATH:/opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/
+#          cd Poses
+#          python -m generate_signsuisse
+#
+#      - name: Upload Artifact Videos
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Videos
+#          path: Poses/Videos
+#          retention-days: 5
+#
+#      - name: Upload Artifact Poses
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Poses
+#          path: Poses/Poses
+#          retention-days: 5
+#
+#      - name: Upload Artifact Svgs
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Svgs
+#          path: Poses/Svgs
+#          retention-days: 5
 #
 #      - name: Generate Photos
 #        run: |
