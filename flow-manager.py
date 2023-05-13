@@ -1,3 +1,7 @@
+import json
+import os
+import shutil
+
 from PIL import Image
 from dataclasses import dataclass
 import torch
@@ -9,62 +13,77 @@ from transformers import CLIPModel
 import subprocess
 import cairosvg
 import io
+
+from utils.pose_utils import save_pose_as_video, concate_two_videos
 from utils.similarity import check_cosin
 
 
-@dataclass
-class ImageTextPair:
-    image: Image
-    text: str
-
-
 class FlowManager:
-    def __init__(self, model: SignWritingModel, audio_recorder: AudioRecorder):
+    def __init__(self, model: SignWritingModel,
+                 audio_recorder: AudioRecorder,
+                 encoded_vectors_path: str):
         self.audio_recorder = audio_recorder
         self.model = model
 
-    def generate_image_text_pairs(self, words_list: list[str]) -> list[ImageTextPair]:
-        image_text_pairs = []
-        for word in words_list:
-            encoded_sw = api_call_spoken2sign({
-                "country_code": 'us',
-                "language_code": 'en',
-                "text": word,
-                "translation_type": "sent"
-            })
-            output = subprocess.check_output(
-                f'node fsw/fsw-sign-svg {encoded_sw}', cwd='sign_writing_approach/sign_to_svg/font_db', shell=True)
-            output_str = output.decode('utf-8')
-            png_bytes = cairosvg.svg2png(output_str)
-            curr_img = Image.open(io.BytesIO(png_bytes))
-            image_text_pairs.append(ImageTextPair(
-                **{'image': curr_img, 'text': word}))
+        with open(encoded_vectors_path) as f:
+            data = list()
+            self.data = [json.loads(s) for i, s in enumerate(data)]
 
-        return image_text_pairs
+    def generate_image(self, spoken_word: str) -> Image:
+        encoded_sw = api_call_spoken2sign({
+            "country_code": 'us',
+            "language_code": 'en',
+            "text": spoken_word,
+            "translation_type": "sent"
+        })
+        output = subprocess.check_output(
+            f'node fsw/fsw-sign-svg {encoded_sw}', cwd='sign_writing_approach/sign_to_png/font_db', shell=True)
+        output_str = output.decode('utf-8')
+        png_bytes = cairosvg.svg2png(output_str)
+        curr_img = Image.open(io.BytesIO(png_bytes))
 
-    def get_similar_pose(similar_tensor_images):
-        pass
+        return curr_img
 
-    def run(self, audio_filename: str, encoded_vectors_path: str):
+    def get_word_pose_url(self, word: str, data):
+        for dt in data:
+            if dt['text'] == word:
+                return dt['pose_url']
+
+        return None
+
+    def run(self, audio_filename: str):
         spoken_text = self.audio_recorder.convert_to_text(
-            filename=audio_filename)
-        words_sentence: list[str] = spoken_text.split(' ')
+            wav_filename=audio_filename)
+        words_sentence: list[str] = spoken_text.replace('`', '').split(' ')
 
-        is_exist = False
-        if not is_exist:
-            image_text_pairs: list[ImageTextPair] = self.generate_image_text_pairs(
-                spoken_text=words_sentence)
-            for image, text in image_text_pairs:
+        for text in words_sentence:
+            pose_url = self.get_word_pose_url(text, self.data)
+            if pose_url:
+                save_pose_as_video(pose_url=pose_url, video_name=text)
+            else:
+                image: Image = self.generate_image(spoken_word=text)
                 encoded_vector: torch.Tensor = self.model.sign_writing_signature(
                     text=text, image=image)
                 similar_tensor_images = check_cosin(traget_vector=encoded_vector,
-                                                    file_encoding_name=encoded_vectors_path)
-                pose = self.get_similar_pose(
-                    similar_tensor_images=similar_tensor_images)
+                                                    data=self.data)
+                save_pose_as_video(
+                    pose_url=similar_tensor_images[0]['pose_url'], video_name=text)
+
+        final_video_name = 'final_video.mp4'
+        video_files_name: list = os.listdir('videos')
+        if len(video_files_name) > 0:
+            os.rename(video_files_name[0], final_video_name)
+        for video_file_name in video_files_name[1:]:
+            concate_two_videos(
+                final_video_name, video_file_name, final_video_name)
+
+        shutil.rmtree('videos')
 
 
 if __name__ == '__main__':
+    audio_file_name = 'my_audio.wav'
+    checkpoint_path = ''
     recorder = AudioRecorder()
-    flow_manager = FlowManager(
-        model=SignWritingModel(''), audio_recorder=recorder)
-    flow_manager.run(audio_filename='my_audio.wav', encoded_vectors_path='')
+    flow_manager = FlowManager(model=SignWritingModel(
+        checkpoint_path=checkpoint_path), audio_recorder=recorder)
+    flow_manager.run(audio_filename=audio_file_name, encoded_vectors_path='')

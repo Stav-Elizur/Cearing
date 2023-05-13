@@ -1,5 +1,13 @@
+import os
+import shutil
+
+from moviepy.video.compositing.concatenate import concatenate_videoclips
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from pose_format import PoseHeader, Pose
 from pose_format.pose_header import PoseNormalizationInfo
+from pose_format.pose_visualizer import PoseVisualizer
+
+from utils.constants import DEFAULT_COMPONENTS
 
 
 def pose_normalization_info(pose_header: PoseHeader) -> PoseNormalizationInfo:
@@ -29,3 +37,43 @@ def pose_hide_legs(pose: Pose):
         pose.body.data[:, :, points, :] = 0 # Data Shape (Frames, People, Points, Dims)
     else:
         raise ValueError("Unknown pose header schema for hiding legs")
+
+
+def save_pose_as_video(pose_url: str,
+                       video_name: str):
+    if os.path.isdir('videos'):
+        shutil.rmtree('videos')
+    os.makedirs('videos')
+
+    print('Loading input pose ...')
+    with open(pose_url, 'rb') as pose_file:
+        pose = Pose.read(pose_file.read())
+        pose = pose.get_components(DEFAULT_COMPONENTS)
+        pose_hide_legs(pose)
+
+        print('Generating videos ...')
+        visualize_pose(pose, f'videos\\{video_name}.mp4')
+
+
+def visualize_pose(pose: Pose,
+                   video_name: str,
+                   ffmpeg_path: str):
+    # Draw original pose
+    visualizer = PoseVisualizer(pose, thickness=2)
+
+    visualizer.save_video(video_name, visualizer.draw(),
+                          custom_ffmpeg=ffmpeg_path)
+
+
+def concate_two_videos(first_video_name: str,
+                       second_video_name: str,
+                       final_video_name: str):
+    # Load the two video files
+    first_video = VideoFileClip(f'{first_video_name}.mp4')
+    second_video = VideoFileClip(f'{second_video_name}.mp4')
+
+    # Concatenate the clips
+    final_video = concatenate_videoclips([first_video, second_video])
+
+    # Write the final clip to a new file
+    final_video.write_videofile(f'{final_video_name}.mp4')

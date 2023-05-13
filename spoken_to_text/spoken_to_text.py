@@ -13,15 +13,15 @@ class AudioRecorder:
                 f.write(audio.get_wav_data())
             print("Audio saved as: " + filename)
 
-    def convert_to_text(self, filename: str):
-        with sr.AudioFile(filename) as source:
+    def convert_to_text(self, wav_filename: str):
+        with sr.AudioFile(wav_filename) as source:
             audio_text = self.recognizer.record(source)
 
         try:
             s = self.recognizer.recognize_google(audio_text)
-            print("Path: ", filename, " Text: "+s)
+            print("Path: ", wav_filename, " Text: " + s)
         except Exception as e:
-            print("wave_path: "+filename+" Exception: "+str(e))
+            print("wave_path: " + wav_filename + " Exception: " + str(e))
             s = str(e)
         return s
 
@@ -29,4 +29,4 @@ class AudioRecorder:
 if __name__ == '__main__':
     recorder = AudioRecorder()
     recorder.record(duration=3, filename="my_audio.wav")
-    recorder.convert_to_text(filename="my_audio.wav")
+    recorder.convert_to_text(wav_filename="my_audio.wav")
