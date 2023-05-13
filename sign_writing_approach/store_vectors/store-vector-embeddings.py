@@ -5,6 +5,7 @@ from zipfile import ZipFile
 
 import cairosvg
 from PIL import Image
+from tqdm import tqdm
 
 from sign_writing_approach.model.sign_writing_model import SignWritingModel
 
@@ -16,20 +17,21 @@ def extract_sign2mint_zip(zip_path: str, dir_name: str):
 
 def store_sign2mint_vectors(model: SignWritingModel, dir_images_path: str):
     with open('../resources/sign2mint.jsonl', 'r') as f:
-        sign2mint = [json.loads(s) for s in list(f)]
-        vectors_list = []
-        for row in sign2mint:
-            uid = row["doc"]["uid"]
-            word = row["captions"][0]["transcription"]
-            png_data = cairosvg.svg2png(url=f'{uid}.svg', write_to=None)
-            curr_img = Image.open(io.BytesIO(png_data))
+        with open("sign2mint-vectors.jsonl", "w") as s:
+            sign2mint = [json.loads(s) for s in list(f)]
+            # vectors_list = []
+            for row in tqdm(sign2mint):
+                uid = row["doc"]["uid"]
+                word = row["captions"][0]["transcription"]
+                png_data = cairosvg.svg2png(url=f'{dir_images_path}/{uid}.svg', write_to=None)
+                curr_img = Image.open(io.BytesIO(png_data))
 
-            embedding_vector = model.sign_writing_signature(
-                text=word, image=curr_img)
-            vectors_list.append(
-                {"word": word, "uid": uid, "embedding_vector": embedding_vector})
-
-        print(vectors_list)
+                embedding_vector = model.sign_writing_signature(
+                    text=word, image=curr_img)
+                result = {"word": word, "uid": uid, "embedding_vector": embedding_vector.tolist()}
+                json_string = json.dumps(result)
+                s.write(json_string + "\n")
+                # vectors_list.append(result)
 
 
 if __name__ == '__main__':
