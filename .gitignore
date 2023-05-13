@@ -22,5 +22,5 @@ hamnosys_approach/videos/
 *sign_writing_approach/clip_fine_tuning/images_info.jsonl
 *sign_writing_approach/images_info.jsonl
 *sign_writing_approach/store_vectors/sign2mint-images
-
+*.oga
 *.wav

@@ -6,8 +6,9 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes,filters
 from pydub import AudioSegment
 
-from spoken_to_text import spoken_to_text
+from sign_writing_approach.model.sign_writing_model import SignWritingModel
 from spoken_to_text.spoken_to_text import AudioRecorder
+from flow_manager import FlowManager
 
 TOKEN = '5993731273:AAHnf_LvkKJO-oWdXf_O20eDvRXKBF7Bkco'
 FFMPEG_PATH = 'C:\\projects\\ffmpeg\\bin'
@@ -16,6 +17,9 @@ os.environ["ffmpeg"] = FFMPEG_PATH
 AudioSegment.converter = FFMPEG_PATH
 AudioSegment.ffmpeg = FFMPEG_PATH
 
+flow_manager = FlowManager(model=SignWritingModel(
+    checkpoint_path='./sign_writing_approach/model/sw_model.ckpt'),
+    encoded_vectors_path='./sign_writing_approach/store_vectors/sign2mint-vectors.jsonl')
 
 # TODO: fix audio shit, create api for the model(easy), queues ?
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -46,6 +50,8 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
     text = recorder.convert_to_text(wav_filename=f'{file_name}.wav')
     await update.message.reply_text(text)
 
+    flow_manager.run(text)
+
     if not text.__contains__('Exception'):
         await context.bot.send_video(chat_id=update.effective_chat.id,
                                      video=open('s2m0a2a63bda69676afdc0a968924754578.mp4', 'rb'))
@@ -64,6 +70,7 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("text", echo))
     application.add_handler(MessageHandler(filters.VOICE, handle_voice_message))
+
     print("Running application...")
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     application.run_polling()

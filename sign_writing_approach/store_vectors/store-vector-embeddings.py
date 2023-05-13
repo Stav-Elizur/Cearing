@@ -17,6 +17,8 @@ def extract_sign2mint_zip(zip_path: str, dir_name: str):
 
 def store_sign2mint_vectors(model: SignWritingModel, dir_images_path: str):
     with open('../resources/sign2mint.jsonl', 'r') as f:
+        if os.path.exists("sign2mint-vectors.jsonl"):
+            return
         with open("sign2mint-vectors.jsonl", "w") as s:
             sign2mint = [json.loads(s) for s in list(f)]
             # vectors_list = []

@@ -24,11 +24,11 @@ def check_cosin(traget_vector: Tensor, data) -> list:
     differences = []
     for dt in data:
         # dt = { "text", "image_text_encoded", "pose_url"}
-        vec = np.array(dt['image_text_encoded']).flatten()
-        img = np.array(traget_vector).flatten()
+        vec = np.array(dt['embedding_vector']).flatten()
+        img = np.array(traget_vector.tolist()).flatten()
         cos_diff = diff(vec, img)
-        differences.append((dt['text'], dt['pose_url'], cos_diff))
+        differences.append((dt['word'], dt['uid'], cos_diff))
 
-    differences = sorted(differences, key=lambda diff_images: diff_images[2])
+    differences = sorted(differences, key=lambda diff_images: diff_images[2],reverse=True)
 
     return differences
