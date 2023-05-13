@@ -51,9 +51,9 @@ jobs:
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: ${{ runner.os }}-dependencies-
 
-      - name: Running Final Project
-        run: |
-          python -m final_project
+#      - name: Running Final Project
+#        run: |
+#          python -m final_project
 #
 #      - name: Generate Photos
 #        run: |
