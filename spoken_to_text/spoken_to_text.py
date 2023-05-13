@@ -1,6 +1,4 @@
 import speech_recognition as sr
-
-
 class AudioRecorder:
     def __init__(self):
         self.recognizer = sr.Recognizer()
@@ -21,8 +19,8 @@ class AudioRecorder:
             s = self.recognizer.recognize_google(audio_text)
             print("Path: ", wav_filename, " Text: " + s)
         except Exception as e:
-            print("wave_path: " + wav_filename + " Exception: " + str(e))
-            s = str(e)
+            s = "wave_path: " + wav_filename + " Exception: " + str(e)
+            print(s)
         return s
 
 
