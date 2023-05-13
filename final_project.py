@@ -27,7 +27,6 @@ install_package('cairosvg')
 install_package('ftfy regex tqdm')
 install_package('transformers')
 install_package('pytorch-lightning')
-install_package('torch')
 
 """#### Import modules"""
 
