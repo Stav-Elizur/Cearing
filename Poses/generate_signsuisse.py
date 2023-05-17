@@ -130,8 +130,7 @@ def fsw_init_package():
 
 #60, 607
 if __name__ == '__main__':
-    batch_num = int(os.getenv('BATCH_NUM'))
-    print("Batch Number: ",batch_num)
+    print("Batch Number: ")
     import itertools
 
     fsw_init_package()
@@ -153,22 +152,28 @@ if __name__ == '__main__':
         shutil.rmtree(svg_folder)
     os.mkdir(svg_folder)
 
-    i = batch_num #277 * (i-1), 277 * i)
-    for datum in tqdm(itertools.islice(signsuisse, 60 * (i-1), 60*i)):
-        print('Generate fsw')
-        tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
+    text = ''
+    with open('not-exist.txt', 'r') as f:
+        text = f.read()
 
-        print('Generate svg')
+    for datum in signsuisse:
         uid = datum['doc']['uid']
-        subprocess.call(f'node fsw/fsw-sign-svg {tr} ../../{svg_folder}/{uid}.svg',
-                        cwd='sign_to_png/font_db', shell=True)
 
-        print('Generate pose')
-        video_name = datum['doc']['url'].split('.mp4')[0]
-        pose_name = uid
-        save_pose(video_name, f'Poses/{pose_name}')
+        if uid not in text.split(','):
+            print('Generate fsw')
+            tr = [transcript for transcript in datum['captions'] if transcript['language'] == 'Sgnw'][0]['transcription']
 
-        print('Generate video')
-        pose_file_path = f'{pose_folder}/{pose_name}'
-        video_file_path = f'{video_folder}/{pose_name}'
-        save_video(pose_file_path, video_file_path)
+            print('Generate svg')
+            uid = datum['doc']['uid']
+            subprocess.call(f'node fsw/fsw-sign-svg "{tr}" ../../{svg_folder}/{uid}.svg',
+                            cwd='sign_to_png/font_db', shell=True)
+
+        # print('Generate pose')
+        # video_name = datum['doc']['url'].split('.mp4')[0]
+        # pose_name = uid
+        # save_pose(video_name, f'Poses/{pose_name}')
+        #
+        # print('Generate video')
+        # pose_file_path = f'{pose_folder}/{pose_name}'
+        # video_file_path = f'{video_folder}/{pose_name}'
+        # save_video(pose_file_path, video_file_path)

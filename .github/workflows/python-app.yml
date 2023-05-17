@@ -58,26 +58,26 @@ jobs:
           cd Poses
           python -m generate_signsuisse
 
-      - name: Upload Artifact Videos
-        uses: actions/upload-artifact@v2
-        with:
-          name: Videos
-          path: Poses/Videos
-          retention-days: 5
-
-      - name: Upload Artifact Poses
-        uses: actions/upload-artifact@v2
-        with:
-          name: Poses
-          path: Poses/Poses
-          retention-days: 5
-
       - name: Upload Artifact Svgs
         uses: actions/upload-artifact@v2
         with:
           name: Svgs
           path: Poses/Svgs
           retention-days: 5
+
+#      - name: Upload Artifact Videos
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Videos
+#          path: Poses/Videos
+#          retention-days: 5
+#
+#      - name: Upload Artifact Poses
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Poses
+#          path: Poses/Poses
+#          retention-days: 5
 #
 #      - name: Generate Photos
 #        run: |
