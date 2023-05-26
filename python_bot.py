@@ -18,8 +18,8 @@ AudioSegment.converter = FFMPEG_PATH
 AudioSegment.ffmpeg = FFMPEG_PATH
 
 flow_manager = FlowManager(model=SignWritingModel(
-    checkpoint_path='./sign_writing_approach/model/sw_model.ckpt'),
-    encoded_vectors_path='./sign_writing_approach/store_vectors/sign2mint-vectors.jsonl')
+    checkpoint_path='./sign_writing_approach/model/sw-model-v1-all-data.ckpt'),
+    encoded_vectors_path='./sign_writing_approach/store_vectors/signsuisse-Vectors-all-model.jsonl')
 
 # TODO: fix audio shit, create api for the model(easy), queues ?
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

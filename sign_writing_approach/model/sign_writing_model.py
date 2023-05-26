@@ -25,9 +25,9 @@ class SignWritingModel:
         self.similarity_model: CLIPModel = self.trainer.model
         self.processor = self.trainer.processor
 
-    def sign_writing_signature(self, text: str, image) -> torch.Tensor:
+    def sign_writing_signature(self, text: str, image):
         inputs = self.trainer.processor(text=text,images=image,return_tensors="pt")
         encoded_text = self.similarity_model.get_text_features(input_ids=inputs.input_ids)
         encoded_image = self.similarity_model.get_image_features(pixel_values=inputs.pixel_values)
-        encoded_vector = torch.cat((encoded_image, encoded_text), dim=-1)
-        return encoded_vector
+        # encoded_vector = torch.cat((encoded_image, encoded_text), dim=-1)
+        return {"encoded_text":encoded_text,"encoded_image":encoded_image}
