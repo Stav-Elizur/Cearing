@@ -20,6 +20,8 @@ class CLIPTrainer(pl.LightningModule):
         self.loss_fn = loss_fn
         self.device = device
 
+        self.model.vision_model.embeddings.position_embedding
+
     def forward(self, input_ids, image):
         return self.model(input_ids=input_ids, visual_inputs=image)
 
